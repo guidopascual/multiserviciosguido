@@ -101,12 +101,9 @@ function entrar(){
   if(pass===PASS){
     cerrarModal();
     var html=b64toUTF8(areaSeleccionada==='pedidos'?DATA.ped:DATA.adm);
-    var win=window.open('','_blank');
-    if(win){
-      win.document.open('text/html','replace');
-      win.document.write('<meta charset="UTF-8">'+html);
-      win.document.close();
-    }
+    var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+    var blobUrl=URL.createObjectURL(blob);
+    window.open(blobUrl,'_blank');
   }else{
     document.getElementById('error-msg').textContent='Contrasena incorrecta';
     document.getElementById('error-msg').style.display='block';
