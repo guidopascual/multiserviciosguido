@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal Checker — M15 Índices</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#080c10; --panel:#0d1318; --border:#1a2530;
+    --green:#00e5a0; --red:#ff3c5a; --yellow:#f5c518;
+    --blue:#4db8ff; --gray:#4a5a6a; --text:#c8d8e8; --dim:#3a4a5a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:24px 16px;
+    background-image:radial-gradient(ellipse at 20% 0%,rgba(0,229,160,.04) 0%,transparent 60%),
+                     radial-gradient(ellipse at 80% 100%,rgba(77,184,255,.04) 0%,transparent 60%);
+  }
+  header{width:100%;max-width:680px;display:flex;flex-direction:column;align-items:center;margin-bottom:22px;gap:6px;}
+  .logo-row{display:flex;align-items:center;gap:10px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,229,160,.6);}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,229,160,0);}}
+  h1{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);letter-spacing:2px;}
+  .subtitle{font-size:13px;color:var(--gray);letter-spacing:1px;font-weight:300;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px;width:100%;max-width:680px;margin-bottom:16px;}
+  .card-title{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px;}
+
+  /* Clock */
+  .clock-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:8px;}
+  .clock{font-family:'Share Tech Mono',monospace;font-size:32px;color:var(--blue);letter-spacing:3px;}
+  .candle-badge{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+  .candle-label{font-size:11px;color:var(--gray);letter-spacing:1px;}
+  .candle-num{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;padding:4px 12px;border-radius:6px;border:1px solid;}
+  .candle-1{color:var(--green);border-color:var(--green);background:rgba(0,229,160,.08);}
+  .candle-2{color:var(--yellow);border-color:var(--yellow);background:rgba(245,197,24,.08);}
+  .candle-out{color:var(--gray);border-color:var(--dim);background:transparent;}
+  .window-bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .window-pill{font-family:'Share Tech Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--gray);letter-spacing:1px;}
+  .window-pill.active{background:rgba(0,229,160,.1);border-color:var(--green);color:var(--green);}
+
+  /* API config */
+  .api-row{display:flex;gap:10px;align-items:flex-end;}
+  .api-row .field{flex:1;}
+  .api-status{font-family:'Share Tech Mono',monospace;font-size:11px;margin-top:8px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.02);}
+  .api-status.ok{color:var(--green);border-color:var(--green);}
+  .api-status.err{color:var(--red);border-color:var(--red);}
+  .api-status.loading{color:var(--yellow);border-color:var(--yellow);}
+
+  /* Live data panel */
+  .live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px;}
+  .live-cell{background:#0a1018;border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center;}
+  .live-cell-label{font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+  .live-cell-val{font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--blue);}
+  .live-cell-val.green{color:var(--green);}
+  .live-cell-val.red{color:var(--red);}
+  .live-cell-val.yellow{color:var(--yellow);}
+  .live-cell-val.gray{color:var(--gray);}
+
+  .refresh-btn{
+    background:transparent;border:1px solid var(--blue);color:var(--blue);
+    border-radius:6px;padding:8px 16px;font-family:'Share Tech Mono',monospace;
+    font-size:12px;cursor:pointer;letter-spacing:1px;transition:all .2s;white-space:nowrap;
+  }
+  .refresh-btn:hover{background:rgba(77,184,255,.1);}
+  .refresh-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .auto-badge{font-size:10px;color:var(--green);font-family:'Share Tech Mono',monospace;letter-spacing:1px;}
+
+  /* Section labels */
+  .section-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin:16px 0 10px;display:flex;align-items:center;gap:8px;}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  .field label{display:block;font-size:11px;color:var(--gray);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase;}
+  .field input,.field select{width:100%;background:#0a1018;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:15px;padding:10px 12px;outline:none;transition:border-color .2s;}
+  .field input:focus,.field select:focus{border-color:var(--blue);}
+  .field select option{background:#0d1318;}
+  .field input.auto-filled{border-color:var(--green);color:var(--green);}
+
+  .tog-row{display:flex;gap:8px;margin-top:4px;}
+  .tog-btn{flex:1;padding:10px 6px;border-radius:6px;border:1px solid var(--border);background:#0a1018;color:var(--gray);font-family:'Share Tech Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s;letter-spacing:1px;text-align:center;}
+  .tog-btn.active-up{border-color:var(--green);color:var(--green);background:rgba(0,229,160,.08);}
+  .tog-btn.active-down{border-color:var(--red);color:var(--red);background:rgba(255,60,90,.08);}
+
+  .angle-wrap{position:relative;}
+  .angle-wrap input{padding-right:44px;}
+  .angle-unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--gray);}
+  .angle-bar{height:4px;border-radius:2px;margin-top:6px;background:linear-gradient(90deg,var(--dim) 0%,var(--yellow) 50%,var(--green) 100%);}
+  .angle-fill{height:100%;background:transparent;border-right:2px solid white;transition:width .3s;}
+
+  .analyze-btn{width:100%;padding:14px;margin-top:10px;background:linear-gradient(135deg,#00e5a0,#00c87a);color:#050c09;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:opacity .2s,transform .1s;}
+  .analyze-btn:hover{opacity:.9;}
+  .analyze-btn:active{transform:scale(.99);}
+
+  .signal-box{border-radius:10px;padding:20px;text-align:center;border:1px solid;transition:all .4s;}
+  .signal-box.call{background:rgba(0,229,160,.07);border-color:var(--green);}
+  .signal-box.put{background:rgba(255,60,90,.07);border-color:var(--red);}
+  .signal-box.neutral{background:rgba(74,90,106,.1);border-color:var(--dim);}
+  .signal-box.wait{background:rgba(245,197,24,.07);border-color:var(--yellow);}
+  .signal-icon{font-size:42px;margin-bottom:8px;}
+  .signal-label{font-family:'Share Tech Mono',monospace;font-size:28px;font-weight:700;letter-spacing:4px;}
+  .signal-label.call{color:var(--green);}
+  .signal-label.put{color:var(--red);}
+  .signal-label.neutral{color:var(--gray);}
+  .signal-label.wait{color:var(--yellow);}
+  .signal-reason{margin-top:10px;font-size:14px;color:var(--text);line-height:1.6;font-weight:300;}
+
+  .checklist{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+  .check-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;padding:8px 12px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid var(--border);}
+  .check-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+  .check-text{color:var(--text);font-weight:300;line-height:1.5;}
+
+  .log-list{display:flex;flex-direction:column;gap:8px;}
+  .log-entry{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:6px;background:rgba(255,255,255,.02);border-left:3px solid;font-size:13px;}
+  .log-entry.call{border-color:var(--green);}
+  .log-entry.put{border-color:var(--red);}
+  .log-entry.neutral{border-color:var(--dim);}
+  .log-entry.wait{border-color:var(--yellow);}
+  .log-time{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gray);flex-shrink:0;}
+  .log-sig{font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;flex-shrink:0;}
+  .log-sig.call{color:var(--green);}
+  .log-sig.put{color:var(--red);}
+  .log-sig.neutral{color:var(--gray);}
+  .log-sig.wait{color:var(--yellow);}
+  .log-desc{color:var(--dim);font-size:12px;}
+  .empty-log{color:var(--dim);font-size:13px;text-align:center;padding:16px;font-family:'Share Tech Mono',monospace;}
+  .clear-btn{background:transparent;border:1px solid var(--border);color:var(--gray);border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:'Rajdhani',sans-serif;letter-spacing:1px;transition:all .2s;float:right;}
+  .clear-btn:hover{border-color:var(--red);color:var(--red);}
+
+  .inside-indicator{margin-top:10px;font-size:13px;color:var(--gray);font-family:'Share Tech Mono',monospace;padding:8px 12px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid var(--border);}
+
+  @media(max-width:480px){.grid2,.grid3{grid-template-columns:1fr;}.clock{font-size:22px;}.live-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-row"><div class="dot"></div><h1>M15 SIGNAL CHECKER</h1></div>
+  <div class="subtitle">S&amp;P 500 · NASDAQ · Bollinger (20,2) + SMA20 · NY 9:30 AM · Polygon.io</div>
+</header>
+
+<!-- RELOJ -->
+<div class="card">
+  <div class="card-title">⏱ Sesión Nueva York</div>
+  <div class="clock-row">
+    <div>
+      <div class="clock" id="clock">--:--:--</div>
+      <div style="font-size:12px;color:var(--gray);margin-top:4px;" id="ny-date">--</div>
+    </div>
+    <div class="candle-badge">
+      <div class="candle-label">VELA M15</div>
+      <div class="candle-num candle-out" id="candle-badge">—</div>
+      <div style="font-size:11px;color:var(--gray);font-family:'Share Tech Mono',monospace;" id="candle-range">—</div>
+    </div>
+  </div>
+  <div class="window-bar" id="window-bar"></div>
+</div>
+
+<!-- API KEY -->
+<div class="card">
+  <div class="card-title">🔑 Configuración Polygon.io</div>
+  <div class="api-row">
+    <div class="field">
+      <label>API Key</label>
+      <input type="password" id="api-key" placeholder="Pega tu API key aquí..." autocomplete="off">
+    </div>
+    <div class="field" style="max-width:160px;">
+      <label>Índice</label>
+      <select id="index">
+        <option value="SPY">S&amp;P 500 (SPY)</option>
+        <option value="QQQ">NASDAQ (QQQ)</option>
+        <option value="DIA">Dow Jones (DIA)</option>
+      </select>
+    </div>
+    <button class="refresh-btn" id="fetch-btn" onclick="fetchData()">⟳ CARGAR</button>
+  </div>
+  <div class="api-status" id="api-status">Ingresa tu API key y presiona CARGAR</div>
+  <div style="margin-top:10px;font-size:12px;color:var(--gray);">
+    Obtén tu key gratis en <span style="color:var(--blue);">polygon.io</span> → Dashboard → API Keys
+  </div>
+</div>
+
+<!-- DATOS EN VIVO -->
+<div class="card" id="live-card" style="display:none;">
+  <div class="card-title">
+    📡 Datos en tiempo real
+    <span class="auto-badge" style="float:right;" id="last-update">—</span>
+  </div>
+  <div class="live-grid">
+    <div class="live-cell"><div class="live-cell-label">Precio Apertura</div><div class="live-cell-val" id="lv-open">—</div></div>
+    <div class="live-cell"><div class="live-cell-label">Precio Actual</div><div class="live-cell-val" id="lv-price">—</div></div>
+    <div class="live-cell"><div class="live-cell-label">Vela Dirección</div><div class="live-cell-val" id="lv-dir">—</div></div>
+    <div class="live-cell"><div class="live-cell-label">BB Superior</div><div class="live-cell-val red" id="lv-upper">—</div></div>
+    <div class="live-cell"><div class="live-cell-label">BB Media (SMA20)</div><div class="live-cell-val yellow" id="lv-mid">—</div></div>
+    <div class="live-cell"><div class="live-cell-label">BB Inferior</div><div class="live-cell-val green" id="lv-lower">—</div></div>
+    <div class="live-cell"><div class="live-cell-label">Apertura DENTRO</div><div class="live-cell-val" id="lv-inside">—</div></div>
+    <div class="live-cell"><div class="live-cell-label">SMA20 Dirección</div><div class="live-cell-val" id="lv-sma-dir">—</div></div>
+    <div class="live-cell"><div class="live-cell-label">Ancho BB %</div><div class="live-cell-val" id="lv-bw">—</div></div>
+  </div>
+</div>
+
+<!-- INPUTS MANUALES -->
+<div class="card">
+  <div class="card-title">📊 Confirmar datos del gráfico</div>
+
+  <div class="grid3">
+    <div class="field">
+      <label>BB Superior</label>
+      <input type="number" id="bb-upper" placeholder="auto / manual" step="0.01" oninput="updateInsideCheck()">
+    </div>
+    <div class="field">
+      <label>SMA20 (punto medio)</label>
+      <input type="number" id="bb-mid" placeholder="auto / manual" step="0.01">
+    </div>
+    <div class="field">
+      <label>BB Inferior</label>
+      <input type="number" id="bb-lower" placeholder="auto / manual" step="0.01" oninput="updateInsideCheck()">
+    </div>
+  </div>
+  <div class="field" style="margin-top:14px;">
+    <label>Precio apertura vela</label>
+    <input type="number" id="open-price" placeholder="auto / manual" step="0.01" oninput="updateInsideCheck()">
+  </div>
+  <div class="inside-indicator" id="inside-indicator">Ingresa precio de apertura y bandas para verificar</div>
+
+  <!-- Ángulos -->
+  <div class="section-label">② Ángulo de apertura de bandas (&gt;30°)</div>
+  <div class="grid2">
+    <div class="field">
+      <label>Ángulo banda SUPERIOR</label>
+      <div class="angle-wrap">
+        <input type="number" id="angle-upper" placeholder="ej. 35" min="0" max="90" step="1" oninput="updateAngleBar('upper')">
+        <span class="angle-unit">°</span>
+      </div>
+      <div class="angle-bar"><div class="angle-fill" id="bar-upper" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--gray);margin-top:4px;" id="label-upper">—</div>
+    </div>
+    <div class="field">
+      <label>Ángulo banda INFERIOR</label>
+      <div class="angle-wrap">
+        <input type="number" id="angle-lower" placeholder="ej. 35" min="0" max="90" step="1" oninput="updateAngleBar('lower')">
+        <span class="angle-unit">°</span>
+      </div>
+      <div class="angle-bar"><div class="angle-fill" id="bar-lower" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--gray);margin-top:4px;" id="label-lower">—</div>
+    </div>
+  </div>
+
+  <!-- SMA dirección -->
+  <div class="section-label">③ Dirección del punto medio (SMA20)</div>
+  <div class="field">
+    <label>¿Hacia dónde apunta la SMA20 visualmente?</label>
+    <div class="tog-row">
+      <button class="tog-btn" id="sma-up"   onclick="setSMA('up')">▲ HACIA ARRIBA</button>
+      <button class="tog-btn" id="sma-down" onclick="setSMA('down')">▼ HACIA ABAJO</button>
+    </div>
+  </div>
+
+  <!-- Dirección vela -->
+  <div class="section-label">④ Dirección de la vela actual</div>
+  <div class="field">
+    <div class="tog-row">
+      <button class="tog-btn" id="dir-up"   onclick="setDir('up')">▲ ALCISTA</button>
+      <button class="tog-btn" id="dir-down" onclick="setDir('down')">▼ BAJISTA</button>
+    </div>
+  </div>
+
+  <button class="analyze-btn" onclick="analyze()">▶ ANALIZAR SEÑAL</button>
+</div>
+
+<!-- RESULTADO -->
+<div class="card" id="result-card" style="display:none;">
+  <div class="card-title">🎯 Resultado del análisis</div>
+  <div class="signal-box neutral" id="signal-box">
+    <div class="signal-icon" id="signal-icon">—</div>
+    <div class="signal-label neutral" id="signal-label">—</div>
+    <div class="signal-reason" id="signal-reason">—</div>
+  </div>
+  <div class="checklist" id="checklist"></div>
+</div>
+
+<!-- HISTORIAL -->
+<div class="card">
+  <div class="card-title">
+    📋 Historial
+    <button class="clear-btn" onclick="clearLog()">Limpiar</button>
+  </div>
+  <div class="log-list" id="log-list">
+    <div class="empty-log">Sin señales registradas</div>
+  </div>
+</div>
+
+<script>
+// ── Estado ──
+let smaDir = null, candleDir = null;
+let signalLog = JSON.parse(localStorage.getItem('m15_log_v3') || '[]');
+let autoRefreshTimer = null;
+
+// ── Reloj NY ──
+function getNY() {
+  return new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+}
+function updateClock() {
+  const ny = getNY();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent = `${pad(ny.getHours())}:${pad(ny.getMinutes())}:${pad(ny.getSeconds())}`;
+  document.getElementById('ny-date').textContent = ny.toLocaleDateString('es-EC',{weekday:'long',day:'numeric',month:'short'});
+  const elapsed = ny.getHours()*60+ny.getMinutes() - (9*60+30);
+  const badge = document.getElementById('candle-badge');
+  const range = document.getElementById('candle-range');
+  const bar   = document.getElementById('window-bar');
+  if (elapsed < 0) {
+    badge.textContent='—'; badge.className='candle-num candle-out';
+    range.textContent='Mercado cerrado'; bar.innerHTML=''; return;
+  }
+  const cn = Math.floor(elapsed/15)+1;
+  const cs = (9*60+30)+(cn-1)*15, ce=cs+15;
+  const fmt = m=>`${pad(Math.floor(m/60))}:${pad(m%60)}`;
+  range.textContent=`${fmt(cs)} – ${fmt(ce)} ET`;
+  badge.textContent=`VELA ${cn}`;
+  badge.className = cn===1?'candle-num candle-1':cn===2?'candle-num candle-2':'candle-num candle-out';
+  const wins=[{l:'9:30 V1',m:0},{l:'9:45 V2',m:15},{l:'10:00',m:30},{l:'10:15',m:45},{l:'10:30',m:60}];
+  bar.innerHTML=wins.map(w=>`<div class="window-pill ${elapsed>=w.m&&elapsed<w.m+15?'active':''}">${w.l}</div>`).join('');
+}
+setInterval(updateClock,1000); updateClock();
+
+// ── Bollinger Calculator ──
+function calcBollinger(closes, period=20, mult=2) {
+  if (closes.length < period) return null;
+  const slice = closes.slice(-period);
+  const sma   = slice.reduce((a,b)=>a+b,0)/period;
+  const variance = slice.reduce((a,b)=>a+(b-sma)**2,0)/period;
+  const std  = Math.sqrt(variance);
+  return { upper: sma+mult*std, mid: sma, lower: sma-mult*std };
+}
+
+// ── Fetch Polygon.io ──
+async function fetchData() {
+  const key    = document.getElementById('api-key').value.trim();
+  const symbol = document.getElementById('index').value;
+  if (!key) { setStatus('err','Ingresa tu API key primero'); return; }
+
+  const btn = document.getElementById('fetch-btn');
+  btn.disabled = true; btn.textContent='⟳ Cargando...';
+  setStatus('loading','Conectando a Polygon.io...');
+
+  try {
+    // Obtener las últimas 30 velas M15
+    const now    = new Date();
+    const from   = new Date(now.getTime() - 5*24*60*60*1000); // 5 días atrás
+    const fromStr= from.toISOString().split('T')[0];
+    const toStr  = now.toISOString().split('T')[0];
+
+    const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}/range/15/minute/${fromStr}/${toStr}?adjusted=true&sort=asc&limit=50&apiKey=${key}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === 'ERROR' || !data.results || data.results.length < 20) {
+      setStatus('err', data.error || `Datos insuficientes (${data.results?.length||0} velas). Verifica tu key o prueba con otro símbolo.`);
+      btn.disabled=false; btn.textContent='⟳ CARGAR'; return;
+    }
+
+    const results = data.results;
+    const closes  = results.map(r=>r.c);
+    const bb      = calcBollinger(closes);
+    if (!bb) { setStatus('err','No hay suficientes velas para calcular Bollinger'); btn.disabled=false; btn.textContent='⟳ CARGAR'; return; }
+
+    // Vela actual (última)
+    const last     = results[results.length-1];
+    const prev     = results[results.length-2];
+    const openP    = last.o;
+    const closeP   = last.c;
+    const candleUp = closeP >= openP;
+
+    // Dirección SMA20 (comparar con SMA20 de vela anterior)
+    const bbPrev   = calcBollinger(closes.slice(0,-1));
+    const smaUp    = bbPrev ? bb.mid > bbPrev.mid : null;
+
+    // Rellenar campos
+    setField('bb-upper', bb.upper.toFixed(2));
+    setField('bb-mid',   bb.mid.toFixed(2));
+    setField('bb-lower', bb.lower.toFixed(2));
+    setField('open-price', openP.toFixed(2));
+    updateInsideCheck();
+
+    // Panel live
+    const insideB = openP > bb.lower && openP < bb.upper;
+    const bw      = ((bb.upper-bb.lower)/bb.mid*100).toFixed(2);
+    document.getElementById('lv-open').textContent  = openP.toFixed(2);
+    document.getElementById('lv-price').textContent = closeP.toFixed(2);
+    document.getElementById('lv-dir').textContent   = candleUp?'▲ ALCISTA':'▼ BAJISTA';
+    document.getElementById('lv-dir').className     = `live-cell-val ${candleUp?'green':'red'}`;
+    document.getElementById('lv-upper').textContent = bb.upper.toFixed(2);
+    document.getElementById('lv-mid').textContent   = bb.mid.toFixed(2);
+    document.getElementById('lv-lower').textContent = bb.lower.toFixed(2);
+    document.getElementById('lv-inside').textContent= insideB?'✅ SÍ':'❌ NO';
+    document.getElementById('lv-inside').className  = `live-cell-val ${insideB?'green':'red'}`;
+    document.getElementById('lv-sma-dir').textContent = smaUp===null?'—':smaUp?'▲ ARRIBA':'▼ ABAJO';
+    document.getElementById('lv-sma-dir').className  = `live-cell-val ${smaUp?'green':'red'}`;
+    document.getElementById('lv-bw').textContent    = bw+'%';
+    document.getElementById('lv-bw').className      = `live-cell-val ${parseFloat(bw)>1.5?'green':'yellow'}`;
+
+    // Auto-set dirección vela y SMA
+    setDir(candleUp?'up':'down');
+    if (smaUp !== null) setSMA(smaUp?'up':'down');
+
+    const nyNow = getNY();
+    const pad=n=>String(n).padStart(2,'0');
+    document.getElementById('last-update').textContent = `Actualizado ${pad(nyNow.getHours())}:${pad(nyNow.getMinutes())}:${pad(nyNow.getSeconds())} ET`;
+    document.getElementById('live-card').style.display='block';
+    setStatus('ok',`✅ Datos cargados: ${symbol} | ${results.length} velas M15 | BB calculado sobre últimas 20`);
+
+    // Auto-refresh cada 60s durante ventana de operación
+    clearInterval(autoRefreshTimer);
+    autoRefreshTimer = setInterval(()=>{ if(isMarketWindow()) fetchData(); }, 60000);
+
+  } catch(e) {
+    setStatus('err','Error de conexión: '+e.message);
+  }
+  btn.disabled=false; btn.textContent='⟳ CARGAR';
+}
+
+function setField(id, val) {
+  const el = document.getElementById(id);
+  el.value = val;
+  el.classList.add('auto-filled');
+}
+function setStatus(type, msg) {
+  const el = document.getElementById('api-status');
+  el.className = 'api-status '+type;
+  el.textContent = msg;
+}
+function isMarketWindow() {
+  const ny=getNY();
+  const total=ny.getHours()*60+ny.getMinutes();
+  return total>=(9*60+30) && total<=(10*60);
+}
+
+// ── UI helpers ──
+function setSMA(d) {
+  smaDir=d;
+  document.getElementById('sma-up').className   = d==='up'  ?'tog-btn active-up'  :'tog-btn';
+  document.getElementById('sma-down').className = d==='down'?'tog-btn active-down':'tog-btn';
+}
+function setDir(d) {
+  candleDir=d;
+  document.getElementById('dir-up').className   = d==='up'  ?'tog-btn active-up'  :'tog-btn';
+  document.getElementById('dir-down').className = d==='down'?'tog-btn active-down':'tog-btn';
+}
+function updateInsideCheck() {
+  const p=parseFloat(document.getElementById('open-price').value);
+  const u=parseFloat(document.getElementById('bb-upper').value);
+  const l=parseFloat(document.getElementById('bb-lower').value);
+  const el=document.getElementById('inside-indicator');
+  if(isNaN(p)||isNaN(u)||isNaN(l)){el.textContent='Ingresa precio de apertura y bandas para verificar';el.style.color='var(--gray)';return;}
+  if(p>l&&p<u){el.textContent=`✅ Apertura ${p} DENTRO de bandas [${l} — ${u}]`;el.style.color='var(--green)';}
+  else{el.textContent=`❌ Apertura ${p} FUERA de bandas [${l} — ${u}] — no operar`;el.style.color='var(--red)';}
+}
+function updateAngleBar(side) {
+  const val=parseFloat(document.getElementById(`angle-${side}`).value)||0;
+  document.getElementById(`bar-${side}`).style.width=Math.min(val/90*100,100)+'%';
+  const lbl=document.getElementById(`label-${side}`);
+  if(val>=30){lbl.textContent=`${val}° — ✅ Apertura significativa`;lbl.style.color='var(--green)';}
+  else if(val>0){lbl.textContent=`${val}° — ❌ Insuficiente (mín 30°)`;lbl.style.color='var(--red)';}
+  else{lbl.textContent='—';lbl.style.color='var(--gray)';}
+}
+document.getElementById('open-price').addEventListener('input',updateInsideCheck);
+
+// ── Análisis ──
+function analyze() {
+  const openP = parseFloat(document.getElementById('open-price').value);
+  const upper = parseFloat(document.getElementById('bb-upper').value);
+  const mid   = parseFloat(document.getElementById('bb-mid').value);
+  const lower = parseFloat(document.getElementById('bb-lower').value);
+  const angU  = parseFloat(document.getElementById('angle-upper').value);
+  const angL  = parseFloat(document.getElementById('angle-lower').value);
+  if([openP,upper,mid,lower,angU,angL].some(isNaN)){alert('Completa todos los campos numéricos.');return;}
+  if(!smaDir){alert('Indica la dirección de la SMA20.');return;}
+  if(!candleDir){alert('Indica la dirección de la vela actual.');return;}
+
+  const ny=getNY();
+  const elapsed=ny.getHours()*60+ny.getMinutes()-(9*60+30);
+  const cn=elapsed>=0?Math.floor(elapsed/15)+1:0;
+  const inWindow=cn===1||cn===2;
+
+  const c1=openP>lower&&openP<upper;
+  const c2=angU>=30&&angL>=30;
+  const callReady=inWindow&&c1&&c2&&smaDir==='up'&&candleDir==='up';
+  const putReady =inWindow&&c1&&c2&&smaDir==='down'&&candleDir==='down';
+
+  const checks=[
+    {ok:inWindow, text:inWindow?`Ventana válida: Vela ${cn} de apertura ✓`:`Vela ${cn>0?cn:'—'} — fuera de ventana (solo velas 1 y 2)`},
+    {ok:c1, text:c1?`① Apertura ${openP} dentro de bandas [${lower} — ${upper}] ✓`:`① Apertura ${openP} FUERA de bandas — no operar`},
+    {ok:c2, text:c2?`② Bandas abiertas: superior ${angU}° / inferior ${angL}° — ambas >30° ✓`:`② Ángulo insuficiente: ${angU}° / ${angL}° — necesitan >30°`},
+    {ok:true, text:`③ SMA20 apunta ${smaDir==='up'?'▲ arriba (favorece CALL)':'▼ abajo (favorece PUT)'}`},
+    {ok:true, text:`④ Vela actual: ${candleDir==='up'?'▲ alcista':'▼ bajista'}`},
+  ];
+
+  let signal, reason;
+  if(!inWindow){signal='wait';reason=`Estás en la vela ${cn>0?cn:'—'}. Solo opera en la 1ª o 2ª vela (9:30–10:00 ET).`;}
+  else if(!c1){signal='neutral';reason='La apertura está FUERA de las bandas. Condición obligatoria no cumplida.';}
+  else if(!c2){signal='wait';reason=`Bandas insuficientes (${angU}°/${angL}°). Necesitas >30° en ambas para confirmar expansión.`;}
+  else if(callReady){signal='call';reason=`✅ CALL confirmado: apertura dentro de bandas, expansión >30° (${angU}°/${angL}°), SMA20 alcista, vela alcista.`;}
+  else if(putReady){signal='put';reason=`✅ PUT confirmado: apertura dentro de bandas, expansión >30° (${angU}°/${angL}°), SMA20 bajista, vela bajista.`;}
+  else if(inWindow&&c1&&c2&&smaDir==='up'&&candleDir==='down'){signal='wait';reason='SMA20 alcista pero vela bajista. Espera confirmación alcista.';}
+  else if(inWindow&&c1&&c2&&smaDir==='down'&&candleDir==='up'){signal='wait';reason='SMA20 bajista pero vela alcista. Espera confirmación bajista.';}
+  else{signal='neutral';reason='Condiciones contradictorias. Sin señal clara.';}
+
+  const icons={call:'⬆️',put:'⬇️',neutral:'⏸',wait:'⚠️'};
+  const labels={call:'CALL',put:'PUT',neutral:'SIN SEÑAL',wait:'ESPERAR'};
+  document.getElementById('signal-box').className=`signal-box ${signal}`;
+  document.getElementById('signal-icon').textContent=icons[signal];
+  const lbl=document.getElementById('signal-label');
+  lbl.textContent=labels[signal]; lbl.className=`signal-label ${signal}`;
+  document.getElementById('signal-reason').textContent=reason;
+  document.getElementById('checklist').innerHTML=checks.map(c=>`<div class="check-item"><span class="check-icon">${c.ok?'✅':'❌'}</span><span class="check-text">${c.text}</span></div>`).join('');
+  document.getElementById('result-card').style.display='block';
+  document.getElementById('result-card').scrollIntoView({behavior:'smooth',block:'start'});
+
+  const pad=n=>String(n).padStart(2,'0');
+  const nyN=getNY();
+  const t=`${pad(nyN.getHours())}:${pad(nyN.getMinutes())} ET`;
+  signalLog.unshift({time:t,signal,label:labels[signal],desc:`${document.getElementById('index').value} | ${angU}°/${angL}° SMA:${smaDir} Vela:${candleDir}`});
+  if(signalLog.length>20) signalLog.pop();
+  localStorage.setItem('m15_log_v3',JSON.stringify(signalLog));
+  renderLog();
+}
+
+function renderLog(){
+  const list=document.getElementById('log-list');
+  if(!signalLog.length){list.innerHTML='<div class="empty-log">Sin señales registradas</div>';return;}
+  list.innerHTML=signalLog.map(e=>`<div class="log-entry ${e.signal}"><span class="log-time">${e.time}</span><span class="log-sig ${e.signal}">${e.label}</span><span class="log-desc">${e.desc}</span></div>`).join('');
+}
+function clearLog(){signalLog=[];localStorage.removeItem('m15_log_v3');renderLog();}
+renderLog();
+</script>
+</body>
+</html>
