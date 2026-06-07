@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Operaciones — Guido Trading</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080c10;--panel:#0d1318;--border:#1a2530;--green:#00e5a0;--red:#ff3c5a;--yellow:#f5c518;--blue:#4db8ff;--gray:#4a5a6a;--text:#c8d8e8;--dim:#3a4a5a;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px;}
+  header{width:100%;max-width:680px;text-align:center;margin-bottom:20px;}
+  h1{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--green);letter-spacing:2px;margin-bottom:4px;}
+  .sub{font-size:12px;color:var(--gray);}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;width:100%;max-width:680px;margin-bottom:14px;}
+  .card-title{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;}
+  .field input,.field select,.field textarea{background:#0a1018;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:14px;padding:10px 12px;outline:none;transition:border-color .2s;width:100%;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);}
+  .field input.auto-filled{border-color:var(--green);color:var(--green);}
+  .field select option{background:#0d1318;}
+  .field textarea{resize:vertical;min-height:60px;}
+  .tog-row{display:flex;gap:8px;}
+  .tog-btn{flex:1;padding:10px;border-radius:6px;border:1px solid var(--border);background:#0a1018;color:var(--gray);font-family:'Share Tech Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s;text-align:center;letter-spacing:1px;}
+  .tog-btn.call{border-color:var(--green);color:var(--green);background:rgba(0,229,160,.08);}
+  .tog-btn.put{border-color:var(--red);color:var(--red);background:rgba(255,60,90,.08);}
+  .result-box{background:#0a1018;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px;}
+  .result-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
+  .result-row:last-child{border:none;}
+  .result-label{font-size:12px;color:var(--gray);}
+  .result-val{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;}
+  .result-val.green{color:var(--green);}
+  .result-val.red{color:var(--red);}
+  .vix-wrap{position:relative;}
+  .vix-wrap input{padding-right:80px;}
+  .vix-status{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;font-family:'Share Tech Mono',monospace;}
+  .vix-bar{height:5px;border-radius:3px;margin-top:6px;background:linear-gradient(90deg,var(--green) 0%,var(--yellow) 50%,var(--red) 100%);}
+  .vix-indicator{height:100%;background:transparent;border-right:3px solid white;transition:width .3s;}
+  .vix-loading{font-size:10px;color:var(--yellow);font-family:'Share Tech Mono',monospace;margin-top:4px;}
+  .auto-badge{font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(0,229,160,.15);color:var(--green);font-family:'Share Tech Mono',monospace;letter-spacing:1px;}
+  .btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,#00e5a0,#00c87a);color:#050c09;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:opacity .2s,transform .1s;margin-top:8px;}
+  .btn-primary:hover{opacity:.9;}
+  .btn-primary:active{transform:scale(.99);}
+  .export-btn{width:100%;padding:12px;background:linear-gradient(135deg,#1a3a6b,#2E75B6);color:#fff;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:opacity .2s;margin-top:6px;}
+  .export-btn:hover{opacity:.9;}
+  .btn-danger{width:100%;padding:8px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s;margin-top:6px;}
+  .btn-danger:hover{background:rgba(255,60,90,.1);}
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;width:100%;max-width:680px;}
+  .stat-box{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+  .stat-label{font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+  .stat-val{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;}
+  .clock{font-family:'Share Tech Mono',monospace;font-size:28px;color:var(--blue);letter-spacing:3px;text-align:center;margin-bottom:4px;}
+  .ny-info{font-size:11px;color:var(--gray);text-align:center;}
+  .log-entry{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.02);border-left:3px solid;margin-bottom:8px;font-size:12px;flex-wrap:wrap;}
+  .log-entry.ganadora{border-color:var(--green);}
+  .log-entry.perdedora{border-color:var(--red);}
+  .log-date{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gray);flex-shrink:0;}
+  .log-strat{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--blue);flex-shrink:0;}
+  .log-signal{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;flex-shrink:0;}
+  .log-signal.call{color:var(--green);}
+  .log-signal.put{color:var(--red);}
+  .log-result{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;margin-left:auto;flex-shrink:0;}
+  .log-result.pos{color:var(--green);}
+  .log-result.neg{color:var(--red);}
+  .empty-log{text-align:center;color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:12px;padding:20px;}
+  .prefilled-banner{background:rgba(0,229,160,.08);border:1px solid var(--green);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--green);font-family:'Share Tech Mono',monospace;display:none;}
+  @media(max-width:480px){.grid2,.grid3{grid-template-columns:1fr;}.stats-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📊 REGISTRO DE OPERACIONES</h1>
+  <div class="sub">Guido Trading · Interactive Brokers · 6 Estrategias</div>
+</header>
+
+<!-- BANNER DATOS PRELLENADOS -->
+<div class="prefilled-banner" id="prefilled-banner">
+  ✅ Datos cargados automáticamente desde TradingView — solo agrega el precio de salida
+</div>
+
+<!-- RELOJ -->
+<div class="card">
+  <div class="card-title">⏱ Hora Nueva York</div>
+  <div class="clock" id="clock">--:--:--</div>
+  <div class="ny-info" id="ny-info">--</div>
+</div>
+
+<!-- ESTADÍSTICAS -->
+<div class="stats-grid">
+  <div class="stat-box"><div class="stat-label">Operaciones</div><div class="stat-val blue" id="stat-total">0</div></div>
+  <div class="stat-box"><div class="stat-label">Ganadoras</div><div class="stat-val green" id="stat-win">0</div></div>
+  <div class="stat-box"><div class="stat-label">Efectividad</div><div class="stat-val yellow" id="stat-eff">0%</div></div>
+  <div class="stat-box"><div class="stat-label">Ganancia Total</div><div class="stat-val green" id="stat-profit">$0.00</div></div>
+  <div class="stat-box"><div class="stat-label">Perdedoras</div><div class="stat-val red" id="stat-loss">0</div></div>
+  <div class="stat-box"><div class="stat-label">VIX Ahora</div><div class="stat-val" id="stat-vix">--</div></div>
+</div>
+
+<!-- FORMULARIO -->
+<div class="card">
+  <div class="card-title">
+    📝 Nueva Operación
+    <span class="auto-badge" id="auto-badge" style="display:none;">AUTO</span>
+  </div>
+
+  <div class="grid2" style="margin-bottom:12px;">
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" id="fecha">
+    </div>
+    <div class="field">
+      <label>Hora ET</label>
+      <input type="time" id="hora">
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:12px;">
+    <div class="field">
+      <label>Estrategia</label>
+      <select id="estrategia">
+        <option value="">— Seleccionar —</option>
+        <option value="E1">E1 — Bollinger 0DTE · 9:30 AM</option>
+        <option value="E2">E2 — Resumen 20 · 9:30 AM</option>
+        <option value="E3">E3 — Resumen 20 · 3:30 PM</option>
+        <option value="E4">E4 — Resumen 20 · 10:00 AM</option>
+        <option value="E5">E5 — Semanal SPY/QQQ</option>
+        <option value="E6">E6 — Swing Trading</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Activo</label>
+      <select id="activo">
+        <option value="SPY">SPY — S&P 500</option>
+        <option value="QQQ">QQQ — NASDAQ</option>
+        <option value="NVDA">NVDA — Nvidia</option>
+        <option value="AAPL">AAPL — Apple</option>
+        <option value="MSFT">MSFT — Microsoft</option>
+        <option value="AMZN">AMZN — Amazon</option>
+        <option value="META">META — Meta</option>
+        <option value="TSLA">TSLA — Tesla</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field" style="margin-bottom:12px;">
+    <label>Señal</label>
+    <div class="tog-row">
+      <button class="tog-btn" id="btn-call" onclick="setSignal('CALL')">⬆️ CALL</button>
+      <button class="tog-btn" id="btn-put" onclick="setSignal('PUT')">⬇️ PUT</button>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-bottom:12px;">
+    <div class="field">
+      <label>Precio Entrada $</label>
+      <input type="number" id="entrada" placeholder="Auto / manual" step="0.01" oninput="calcResult()">
+    </div>
+    <div class="field">
+      <label>Precio Salida $ ✏️</label>
+      <input type="number" id="salida" placeholder="Ingresar al cerrar" step="0.01" oninput="calcResult()">
+    </div>
+    <div class="field">
+      <label>Contratos</label>
+      <input type="number" id="contratos" placeholder="1" min="1" value="1" oninput="calcResult()">
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:12px;">
+    <div class="field">
+      <label>Inversión $ por contrato</label>
+      <input type="number" id="inversion" placeholder="2000" step="0.01" oninput="calcResult()">
+    </div>
+    <div class="field">
+      <label>VIX <span class="auto-badge" id="vix-auto-badge">AUTO</span></label>
+      <div class="vix-wrap">
+        <input type="number" id="vix" placeholder="Cargando..." step="0.1" oninput="updateVixBar()">
+        <span class="vix-status" id="vix-status"></span>
+      </div>
+      <div class="vix-bar"><div class="vix-indicator" id="vix-bar" style="width:0%"></div></div>
+      <div class="vix-loading" id="vix-loading">⟳ Obteniendo VIX en tiempo real...</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:12px;">
+    <div class="field">
+      <label>Condiciones cumplidas</label>
+      <input type="text" id="condiciones" placeholder="ej. 7/9">
+    </div>
+    <div class="field">
+      <label>Duración</label>
+      <input type="text" id="duracion" placeholder="ej. 15 min">
+    </div>
+  </div>
+
+  <div class="field" style="margin-bottom:12px;">
+    <label>Notas</label>
+    <textarea id="notas" placeholder="Observaciones..."></textarea>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="result-box" id="result-box" style="display:none;">
+    <div class="result-row">
+      <span class="result-label">Ganancia / Pérdida</span>
+      <span class="result-val" id="res-ganancia">$0.00</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Resultado %</span>
+      <span class="result-val" id="res-pct">0%</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Estado</span>
+      <span class="result-val" id="res-estado">—</span>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="guardarOperacion()">💾 GUARDAR OPERACIÓN</button>
+</div>
+
+<!-- HISTORIAL -->
+<div class="card">
+  <div class="card-title">📋 Historial</div>
+  <div id="log-list"><div class="empty-log">Sin operaciones registradas</div></div>
+  <button class="export-btn" onclick="exportarCSV()">📥 EXPORTAR CSV</button>
+  <button class="btn-danger" onclick="limpiarTodo()">🗑 Limpiar todo</button>
+</div>
+
+<script>
+// ── Estado ──
+let signal = null;
+let operaciones = JSON.parse(localStorage.getItem('trading_guido_ops') || '[]');
+
+// ── Reloj NY ──
+function getNY(){ return new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'})); }
+function updateClock(){
+  const ny=getNY(), pad=n=>String(n).padStart(2,'0');
+  document.getElementById('clock').textContent=`${pad(ny.getHours())}:${pad(ny.getMinutes())}:${pad(ny.getSeconds())}`;
+  const total=ny.getHours()*60+ny.getMinutes(), open=9*60+30;
+  const elapsed=total-open;
+  let info='';
+  if(elapsed<0) info='Mercado cerrado';
+  else if(elapsed<30) info=`🟢 APERTURA — Vela ${Math.floor(elapsed/15)+1} · E1/E2 activas`;
+  else if(elapsed<90) info='🔵 Segunda ventana — E4 activa';
+  else if(elapsed<390) info='⚪ Zona de pausa — no operar 0DTE';
+  else if(elapsed<420) info='🟠 CIERRE — E3 activa · Vender antes 3:58 PM';
+  else info='Mercado cerrando';
+  document.getElementById('ny-info').textContent=info;
+}
+setInterval(updateClock,1000); updateClock();
+
+// ── VIX en tiempo real ──
+async function fetchVIX() {
+  try {
+    // Intentar Yahoo Finance via proxy público
+    const res = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1m&range=1d');
+    const data = await res.json();
+    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (price) {
+      document.getElementById('vix').value = price.toFixed(2);
+      document.getElementById('vix').classList.add('auto-filled');
+      document.getElementById('vix-loading').textContent = `✅ VIX actualizado automáticamente`;
+      document.getElementById('vix-loading').style.color = 'var(--green)';
+      updateVixBar();
+      updateStatVix(price);
+      return;
+    }
+  } catch(e) {}
+  // Fallback — pedir manual
+  document.getElementById('vix-loading').textContent = '⚠️ Ingresa el VIX manualmente (markets.cboe.com)';
+  document.getElementById('vix-loading').style.color = 'var(--yellow)';
+  document.getElementById('vix-auto-badge').style.display = 'none';
+}
+
+function updateStatVix(v) {
+  const el = document.getElementById('stat-vix');
+  el.textContent = parseFloat(v).toFixed(1);
+  el.className = `stat-val ${v<15?'green':v<25?'yellow':'red'}`;
+}
+
+function updateVixBar() {
+  const v = parseFloat(document.getElementById('vix').value)||0;
+  document.getElementById('vix-bar').style.width = Math.min(v/50*100,100)+'%';
+  const s = document.getElementById('vix-status');
+  if(v>0&&v<15){s.textContent='🟢';s.style.color='var(--green)';}
+  else if(v>=15&&v<25){s.textContent='🟡';s.style.color='var(--yellow)';}
+  else if(v>=25){s.textContent='🔴';s.style.color='var(--red)';}
+  updateStatVix(v);
+}
+
+// ── Leer parámetros URL ──
+function loadURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  let hasParams = false;
+
+  if(params.get('estrategia')) {
+    document.getElementById('estrategia').value = params.get('estrategia');
+    document.getElementById('estrategia').classList.add('auto-filled');
+    hasParams = true;
+  }
+  if(params.get('activo')) {
+    document.getElementById('activo').value = params.get('activo');
+    document.getElementById('activo').classList.add('auto-filled');
+    hasParams = true;
+  }
+  if(params.get('signal')) {
+    setSignal(params.get('signal'));
+    hasParams = true;
+  }
+  if(params.get('entrada')) {
+    document.getElementById('entrada').value = params.get('entrada');
+    document.getElementById('entrada').classList.add('auto-filled');
+    hasParams = true;
+  }
+  if(params.get('inversion')) {
+    document.getElementById('inversion').value = params.get('inversion');
+    document.getElementById('inversion').classList.add('auto-filled');
+  }
+  if(params.get('condiciones')) {
+    document.getElementById('condiciones').value = params.get('condiciones');
+    document.getElementById('condiciones').classList.add('auto-filled');
+  }
+  if(params.get('fecha')) {
+    document.getElementById('fecha').value = params.get('fecha');
+  }
+  if(params.get('hora')) {
+    document.getElementById('hora').value = params.get('hora');
+  }
+
+  if(hasParams) {
+    document.getElementById('prefilled-banner').style.display = 'block';
+    document.getElementById('auto-badge').style.display = 'inline';
+    calcResult();
+  }
+}
+
+// ── Init fecha/hora ──
+function initDateTime() {
+  const ny=getNY(), pad=n=>String(n).padStart(2,'0');
+  if(!document.getElementById('fecha').value)
+    document.getElementById('fecha').value=`${ny.getFullYear()}-${pad(ny.getMonth()+1)}-${pad(ny.getDate())}`;
+  if(!document.getElementById('hora').value)
+    document.getElementById('hora').value=`${pad(ny.getHours())}:${pad(ny.getMinutes())}`;
+}
+
+// ── Señal ──
+function setSignal(s){
+  signal=s;
+  document.getElementById('btn-call').className=s==='CALL'?'tog-btn call':'tog-btn';
+  document.getElementById('btn-put').className=s==='PUT'?'tog-btn put':'tog-btn';
+  calcResult();
+}
+
+// ── Cálculo ──
+function calcResult(){
+  const entrada=parseFloat(document.getElementById('entrada').value)||0;
+  const salida=parseFloat(document.getElementById('salida').value)||0;
+  const contratos=parseInt(document.getElementById('contratos').value)||1;
+  const inversion=parseFloat(document.getElementById('inversion').value)||0;
+  if(!entrada||!salida||!inversion){document.getElementById('result-box').style.display='none';return;}
+  let ganancia=0;
+  if(signal==='CALL') ganancia=(salida-entrada)*contratos*100;
+  else if(signal==='PUT') ganancia=(entrada-salida)*contratos*100;
+  else ganancia=(salida-entrada)*contratos;
+  const pct=inversion>0?(ganancia/inversion)*100:0;
+  const g=document.getElementById('res-ganancia');
+  const p=document.getElementById('res-pct');
+  const e=document.getElementById('res-estado');
+  g.textContent=`${ganancia>=0?'+':''}$${ganancia.toFixed(2)}`;
+  g.className=`result-val ${ganancia>=0?'green':'red'}`;
+  p.textContent=`${pct>=0?'+':''}${pct.toFixed(2)}%`;
+  p.className=`result-val ${pct>=0?'green':'red'}`;
+  e.textContent=ganancia>=0?'✅ GANADORA':'❌ PERDEDORA';
+  e.className=`result-val ${ganancia>=0?'green':'red'}`;
+  document.getElementById('result-box').style.display='block';
+}
+
+// ── Guardar ──
+function guardarOperacion(){
+  const fecha=document.getElementById('fecha').value;
+  const hora=document.getElementById('hora').value;
+  const estrategia=document.getElementById('estrategia').value;
+  const activo=document.getElementById('activo').value;
+  const entrada=parseFloat(document.getElementById('entrada').value)||0;
+  const salida=parseFloat(document.getElementById('salida').value)||0;
+  const contratos=parseInt(document.getElementById('contratos').value)||1;
+  const inversion=parseFloat(document.getElementById('inversion').value)||0;
+  const vix=parseFloat(document.getElementById('vix').value)||0;
+  const condiciones=document.getElementById('condiciones').value;
+  const duracion=document.getElementById('duracion').value;
+  const notas=document.getElementById('notas').value;
+
+  if(!fecha||!estrategia||!signal||!entrada||!inversion){
+    alert('Completa: fecha, estrategia, señal, precio de entrada e inversión.');
+    return;
+  }
+
+  let ganancia=0;
+  if(signal==='CALL') ganancia=salida>0?(salida-entrada)*contratos*100:0;
+  else if(signal==='PUT') ganancia=salida>0?(entrada-salida)*contratos*100:0;
+  const pct=inversion>0?(ganancia/inversion)*100:0;
+
+  const op={
+    id:Date.now(), fecha, hora, estrategia, activo, signal,
+    entrada, salida, contratos, inversion, ganancia, pct,
+    vix, condiciones, duracion, notas,
+    estado: ganancia>=0?'ganadora':'perdedora'
+  };
+
+  operaciones.unshift(op);
+  localStorage.setItem('trading_guido_ops',JSON.stringify(operaciones));
+  renderLog(); updateStats();
+  resetForm();
+  alert('✅ Operación guardada');
+}
+
+function resetForm(){
+  initDateTime();
+  ['estrategia','entrada','salida','condiciones','duracion','notas'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el.tagName==='SELECT') el.value='';
+    else el.value='';
+    el.classList.remove('auto-filled');
+  });
+  document.getElementById('contratos').value='1';
+  document.getElementById('inversion').value='';
+  document.getElementById('result-box').style.display='none';
+  document.getElementById('prefilled-banner').style.display='none';
+  document.getElementById('auto-badge').style.display='none';
+  signal=null;
+  document.getElementById('btn-call').className='tog-btn';
+  document.getElementById('btn-put').className='tog-btn';
+  // Limpiar URL params
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
+function renderLog(){
+  const list=document.getElementById('log-list');
+  if(!operaciones.length){list.innerHTML='<div class="empty-log">Sin operaciones registradas</div>';return;}
+  list.innerHTML=operaciones.map(op=>`
+    <div class="log-entry ${op.estado}">
+      <span class="log-date">${op.fecha}</span>
+      <span class="log-strat">${op.estrategia}</span>
+      <span class="log-signal ${op.signal.toLowerCase()}">${op.signal}</span>
+      <span style="font-size:11px;color:var(--gray);">${op.activo}</span>
+      <span class="log-result ${op.ganancia>=0?'pos':'neg'}" style="margin-left:auto;">${op.ganancia>=0?'+':''}$${op.ganancia.toFixed(2)} (${op.pct>=0?'+':''}${op.pct.toFixed(1)}%)</span>
+      <button onclick="eliminar(${op.id})" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0;">✕</button>
+    </div>`).join('');
+}
+
+function updateStats(){
+  const total=operaciones.length;
+  const wins=operaciones.filter(o=>o.estado==='ganadora').length;
+  const profit=operaciones.reduce((a,o)=>a+o.ganancia,0);
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-win').textContent=wins;
+  document.getElementById('stat-loss').textContent=total-wins;
+  document.getElementById('stat-eff').textContent=total>0?Math.round(wins/total*100)+'%':'0%';
+  const el=document.getElementById('stat-profit');
+  el.textContent=`${profit>=0?'+':''}$${profit.toFixed(2)}`;
+  el.className=`stat-val ${profit>=0?'green':'red'}`;
+}
+
+function eliminar(id){
+  if(!confirm('¿Eliminar esta operación?')) return;
+  operaciones=operaciones.filter(o=>o.id!==id);
+  localStorage.setItem('trading_guido_ops',JSON.stringify(operaciones));
+  renderLog(); updateStats();
+}
+
+function limpiarTodo(){
+  if(!confirm('¿Eliminar TODAS las operaciones?')) return;
+  operaciones=[];
+  localStorage.setItem('trading_guido_ops','[]');
+  renderLog(); updateStats();
+}
+
+function exportarCSV(){
+  if(!operaciones.length){alert('No hay operaciones para exportar.');return;}
+  const h=['Fecha','Hora ET','Estrategia','Activo','Señal','Precio Entrada','Precio Salida','Contratos','Inversión $','Ganancia $','Resultado %','VIX','Condiciones','Duración','Estado','Notas'];
+  const rows=operaciones.map(o=>[
+    o.fecha,o.hora,o.estrategia,o.activo,o.signal,
+    o.entrada,o.salida,o.contratos,o.inversion,
+    o.ganancia.toFixed(2),o.pct.toFixed(2)+'%',
+    o.vix,o.condiciones,o.duracion,o.estado.toUpperCase(),
+    `"${(o.notas||'').replace(/"/g,'""')}"`
+  ].join(','));
+  const csv=[h.join(','),...rows].join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`registro_trading_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+// ── Init ──
+initDateTime();
+loadURLParams();
+fetchVIX();
+setInterval(fetchVIX, 60000); // Actualiza VIX cada minuto
+renderLog();
+updateStats();
+</script>
+</body>
+</html>
