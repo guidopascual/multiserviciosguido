@@ -223,11 +223,57 @@
 <div class="card">
   <div class="card-title">📋 Historial</div>
   <div id="log-list"><div class="empty-log">Sin operaciones registradas</div></div>
-  <button class="export-btn" onclick="exportarCSV()">📥 EXPORTAR CSV</button>
+  <button class="export-btn" onclick="exportarExcel()">📊 EXPORTAR A EXCEL</button>
+  <button class="export-btn" style="background:linear-gradient(135deg,#2d6a2d,#1a6b3c);margin-top:6px;" onclick="exportarCSV()">📥 EXPORTAR CSV</button>
   <button class="btn-danger" onclick="limpiarTodo()">🗑 Limpiar todo</button>
 </div>
 
 <script>
+
+// ── SheetJS para Excel ──
+async function loadSheetJS() {
+  if(window.XLSX) return;
+  await new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=res; s.onerror=rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function exportarExcel(){
+  if(!operaciones.length){alert('No hay operaciones para exportar.');return;}
+  await loadSheetJS();
+  const headers=['Fecha','Hora ET','Estrategia','Activo','Señal',
+    'Precio Entrada $','Precio Salida $','Contratos','Inversión $',
+    'Ganancia $','Resultado %','VIX','Condiciones','Duración','Estado','Notas'];
+  const rows=operaciones.map(o=>[
+    o.fecha,o.hora,o.estrategia,o.activo,o.signal,
+    o.entrada,o.salida,o.contratos,o.inversion,
+    parseFloat(o.ganancia.toFixed(2)),parseFloat(o.pct.toFixed(2)),
+    o.vix,o.condiciones,o.duracion,
+    o.estado==='ganadora'?'✅ GANADORA':'❌ PERDEDORA',o.notas||''
+  ]);
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
+  ws['!cols']=[{wch:12},{wch:10},{wch:22},{wch:8},{wch:8},{wch:14},{wch:14},{wch:10},{wch:12},{wch:12},{wch:12},{wch:8},{wch:12},{wch:10},{wch:14},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,ws,'Registro Diario');
+  const total=operaciones.length,wins=operaciones.filter(o=>o.estado==='ganadora').length;
+  const profit=operaciones.reduce((a,o)=>a+o.ganancia,0);
+  const resumen=[
+    ['RESUMEN',''],['',''],
+    ['Total operaciones',total],['Ganadoras',wins],['Perdedoras',total-wins],
+    ['Efectividad %',total>0?Math.round(wins/total*100)+'%':'0%'],
+    ['Ganancia total $',parseFloat(profit.toFixed(2))],['',''],
+    ['Por estrategia','Ops'],
+    ...['E1','E2','E3','E4','E5','E6'].map(e=>[e,operaciones.filter(o=>o.estrategia.startsWith(e)).length])
+  ];
+  const wsR=XLSX.utils.aoa_to_sheet(resumen);
+  wsR['!cols']=[{wch:25},{wch:15}];
+  XLSX.utils.book_append_sheet(wb,wsR,'Resumen');
+  XLSX.writeFile(wb,`registro_trading_guido_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
 // ── Estado ──
 let signal = null;
 let operaciones = JSON.parse(localStorage.getItem('trading_guido_ops') || '[]');
