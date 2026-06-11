@@ -3,1043 +3,311 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pine Script — Trading View</title>
+<title>Pine Script — 6 Estrategias (Versión Objetiva)</title>
 <style>
-  :root{--bg:#080c10;--panel:#0d1318;--border:#1a2530;--green:#00e5a0;--blue:#4db8ff;--gray:#4a5a6a;--text:#c8d8e8;--yellow:#f5c518;--red:#ff3c5a;}
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px;}
-  h1{font-size:18px;color:var(--green);letter-spacing:2px;text-align:center;margin-bottom:6px;}
-  .sub{font-size:12px;color:var(--gray);text-align:center;margin-bottom:20px;}
-  .copy-btn{width:100%;max-width:720px;padding:16px;margin-bottom:16px;background:linear-gradient(135deg,#00e5a0,#00c87a);color:#050c09;border:none;border-radius:10px;font-size:18px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:opacity .2s,transform .1s;}
-  .copy-btn:hover{opacity:.9;}
-  .copy-btn:active{transform:scale(.99);}
-  .copy-btn.copied{background:linear-gradient(135deg,#4db8ff,#0090cc);color:#fff;}
-  .info{width:100%;max-width:720px;margin-bottom:16px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
-  .info-box{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;}
-  .info-label{font-size:9px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
-  .info-val{font-size:13px;color:var(--blue);font-weight:700;}
-  .strat-grid{width:100%;max-width:720px;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
-  .strat-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;}
-  .strat-card.e5{border-color:var(--yellow);}
-  .strat-card.e6{border-color:var(--blue);}
-  .strat-name{font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px;letter-spacing:1px;}
-  .strat-name.yellow{color:var(--yellow);}
-  .strat-name.blue{color:var(--blue);}
-  .strat-row{font-size:11px;color:var(--text);margin-bottom:2px;}
-  .strat-row span{color:var(--blue);}
-  .badge{font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(0,229,160,.15);color:var(--green);margin-left:4px;font-weight:700;}
-  .badge.yellow{background:rgba(245,197,24,.15);color:var(--yellow);}
-  .code-label{width:100%;max-width:720px;margin:0 0 8px;font-size:11px;color:var(--gray);letter-spacing:1px;}
-  .code-box{width:100%;max-width:720px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'Courier New',monospace;font-size:11px;color:#a8c8b8;line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:400px;overflow-y:auto;}
-  table{width:100%;max-width:720px;border-collapse:collapse;margin-bottom:16px;font-size:12px;}
-  th{background:#1F4E79;color:#fff;padding:8px 10px;text-align:left;}
-  td{padding:7px 10px;border-bottom:1px solid var(--border);}
-  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+:root{--bg:#080c10;--panel:#0d1318;--border:#1a2530;--green:#00e5a0;--blue:#4db8ff;--gold:#f5c518;--text:#c8d8e8;--gray:#4a5a6a;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;padding:20px;max-width:900px;margin:0 auto;}
+h1{color:var(--green);font-size:22px;text-align:center;margin-bottom:6px;}
+.sub{text-align:center;color:var(--gray);font-size:13px;margin-bottom:20px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;}
+.card h2{color:var(--blue);font-size:15px;margin-bottom:10px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:#1a2a3a;color:#fff;padding:8px 6px;text-align:left;}
+td{padding:7px 6px;border-bottom:1px solid var(--border);}
+tr:nth-child(even){background:rgba(255,255,255,.02);}
+.copy-btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#00e5a0,#00c87a);color:#050c09;border:none;border-radius:10px;font-size:17px;font-weight:700;cursor:pointer;margin:18px 0;letter-spacing:1px;}
+.copy-btn:active{transform:scale(.99);}
+.copy-btn.copied{background:linear-gradient(135deg,#4db8ff,#2a8fd8);color:#fff;}
+pre{background:#0a1018;border:1px solid var(--border);border-radius:10px;padding:14px;overflow-x:auto;font-size:11px;line-height:1.5;color:#a8c8e0;max-height:500px;overflow-y:auto;}
+.steps{font-size:13px;line-height:1.8;}
+.steps b{color:var(--gold);}
+.warn{background:rgba(245,197,24,.08);border:1px solid var(--gold);border-radius:8px;padding:12px;font-size:12px;color:var(--gold);margin-bottom:14px;}
 </style>
 </head>
 <body>
-<h1>📊 PINE SCRIPT PARA TRADING VIEW</h1>
-<div class="sub">6 Estrategias · 0DTE + Semanal + Swing · SPY/QQQ · M15 · VIX &lt;25</div>
+<h1>📊 Pine Script — 6 Estrategias</h1>
+<div class="sub">Versión objetiva · Ventanas como requisito · Strike ATM · Condiciones medibles</div>
 
-<button class="copy-btn" id="copyBtn" onclick="copyScript()">📋 COPIAR PINE SCRIPT COMPLETO</button>
+<div class="warn">⚠️ Estrategias sin probar en vivo. Validar con paper trading mínimo 2 meses antes de usar dinero real. Verificar siempre: VIX &lt; 25 y spread del contrato &lt; 5%.</div>
 
-<div class="info">
-  <div class="info-box"><div class="info-label">Estrategias</div><div class="info-val">6</div></div>
-  <div class="info-box"><div class="info-label">Alertas</div><div class="info-val">12</div></div>
-  <div class="info-box"><div class="info-label">Versión</div><div class="info-val">Pine v5</div></div>
-  <div class="info-box"><div class="info-label">Activos</div><div class="info-val">SPY/QQQ</div></div>
-  <div class="info-box"><div class="info-label">VIX Max</div><div class="info-val">25</div></div>
-</div>
-
+<div class="card">
+<h2>Resumen de las 6 estrategias</h2>
 <table>
-  <tr><th>#</th><th>Nombre</th><th>Condiciones</th><th>Mínimo</th><th>TP</th><th>SL</th></tr>
-  <tr><td>E1</td><td>Bollinger 0DTE</td><td>8</td><td>6 de 8</td><td>50%</td><td>25%</td></tr>
-  <tr><td>E2</td><td>Resumen 20 · 9:30 AM</td><td>9</td><td>7 de 9</td><td>30%</td><td>15%</td></tr>
-  <tr><td>E3</td><td>Resumen 20 · 3:30 PM</td><td>9</td><td>7 de 9</td><td>20%</td><td>10%</td></tr>
-  <tr><td>E4</td><td>Resumen 20 · 10:00 AM</td><td>9</td><td>7 de 9</td><td>25%</td><td>15%</td></tr>
-  <tr><td>E5</td><td>Semanal + StochRSI ⭐</td><td>11</td><td><b>9 de 11</b></td><td>50%</td><td>25%</td></tr>
-  <tr><td>E6</td><td>Swing + OBV + Ichimoku</td><td>8</td><td><b>7 de 8</b></td><td>15%</td><td>5% dinámico</td></tr>
+<tr><th>Estrategia</th><th>Ventana (requisito)</th><th>Score</th><th>TP / SL</th></tr>
+<tr><td>E1 — Bollinger 0DTE</td><td>Vela 9:45 AM ET</td><td>3 de 4</td><td>20% / 15%</td></tr>
+<tr><td>E2 — Resumen 20 + H1</td><td>9:30–10:00 AM ET + tendencia H1</td><td>3 de 4</td><td>20% / 15%</td></tr>
+<tr><td>E3 — Cierre con dirección</td><td>3:30–3:58 PM ET + día ±1%</td><td>3 de 4</td><td>Salida 3:55 PM / SL 10%</td></tr>
+<tr><td>E4 — Continuación mañana</td><td>10:00–11:00 AM ET</td><td>3 de 4</td><td>20% / 15%</td></tr>
+<tr><td>E5 — Semanal</td><td>Lun/Mar AM + tendencia diaria</td><td>4 de 5</td><td>50% / 25%</td></tr>
+<tr><td>E6 — Swing (manual)</td><td>Gráfico diario, 3–10 días</td><td>4 de 5</td><td>15% / 5% trailing</td></tr>
 </table>
-
-<div class="strat-grid">
-  <div class="strat-card">
-    <div class="strat-name">E1 — BOLLINGER 0DTE</div>
-    <div class="strat-row">⏰ <span>9:30–10:00 AM ET</span></div>
-    <div class="strat-row">✅ <span>6 de 8</span> condiciones</div>
-    <div class="strat-row">💰 TP <span>50%</span> · SL <span>25%</span></div>
-  </div>
-  <div class="strat-card">
-    <div class="strat-name">E2 — RESUMEN 20 · 9:30 AM</div>
-    <div class="strat-row">⏰ <span>9:30–10:00 AM ET</span></div>
-    <div class="strat-row">✅ <span>7 de 9</span> condiciones</div>
-    <div class="strat-row">💰 TP <span>30%</span> · SL <span>15%</span></div>
-  </div>
-  <div class="strat-card">
-    <div class="strat-name">E3 — RESUMEN 20 · 3:30 PM</div>
-    <div class="strat-row">⏰ <span>3:30–3:58 PM ET</span></div>
-    <div class="strat-row">✅ <span>7 de 9</span> condiciones</div>
-    <div class="strat-row">💰 TP <span>20%</span> · SL <span>10%</span></div>
-  </div>
-  <div class="strat-card">
-    <div class="strat-name">E4 — RESUMEN 20 · 10:00 AM</div>
-    <div class="strat-row">⏰ <span>10:00–11:00 AM ET</span></div>
-    <div class="strat-row">✅ <span>7 de 9</span> condiciones</div>
-    <div class="strat-row">💰 TP <span>25%</span> · SL <span>15%</span></div>
-  </div>
-  <div class="strat-card e5" style="grid-column:span 2;">
-    <div class="strat-name yellow">E5 — SEMANAL SPY/QQQ ⭐ <span class="badge yellow">9 de 11</span> <span class="badge yellow">StochRSI</span></div>
-    <div class="strat-row">⏰ <span>Lunes/Martes 9:30–11:00 AM ET</span> · Expira viernes</div>
-    <div class="strat-row">✅ Mínimo <span>9 de 11</span> condiciones · Vender jueves si +35%</div>
-    <div class="strat-row">💰 TP <span>50%</span> · SL <span>25%</span> · Regla: 2 pérdidas = parar semana</div>
-  </div>
-  <div class="strat-card e6" style="grid-column:span 2;">
-    <div class="strat-name blue">E6 — SWING TRADING <span class="badge">7 de 8</span> <span class="badge">OBV</span> <span class="badge">Ichimoku</span> <span class="badge">Trailing Stop</span></div>
-    <div class="strat-row">📅 <span>3 a 10 días · Gráfico diario</span> · NVDA · AAPL · MSFT · AMZN · META · TSLA</div>
-    <div class="strat-row">✅ Mínimo <span>7 de 8</span> condiciones · Sin earnings · VIX &lt;25</div>
-    <div class="strat-row">💰 TP <span>15%</span> · SL <span>5% dinámico</span> · Stop sube con el precio automáticamente</div>
-  </div>
 </div>
 
-<div class="code-label">CÓDIGO COMPLETO — Pine Script v5 (E1 a E5 · E6 es manual en gráfico diario):</div>
-<div class="code-box">//@version=5
+<button class="copy-btn" id="btn" onclick="copiar()">📋 COPIAR PINE SCRIPT COMPLETO</button>
+
+<div class="card">
+<h2>Cómo instalarlo en TradingView</h2>
+<div class="steps">
+<b>1.</b> Click en el botón verde de arriba — el script queda copiado<br>
+<b>2.</b> Abre TradingView → gráfico de SPY o QQQ en M15<br>
+<b>3.</b> Abajo: <b>Pine Editor</b> → borra todo → pega (Ctrl+V)<br>
+<b>4.</b> Click <b>Guardar</b> → <b>Agregar al gráfico</b><br>
+<b>5.</b> Click derecho en el indicador → <b>Crear alerta</b> → elige cada condición (E1 CALL, E1 PUT, etc.)<br>
+<b>6.</b> En cada alerta activa: notificación + email · Frecuencia: <b>Una vez por cierre de barra</b>
+</div>
+</div>
+
+<div class="card">
+<h2>Código fuente</h2>
+<pre id="code">//@version=5
 indicator("📊 Pine Script Para Trading View", overlay=true, max_bars_back=500)
 
 // ══════════════════════════════════════════
-//   ULTIMATE ENTRY M15 — 4 ESTRATEGIAS
-//   E1: Bollinger 0DTE        9:30–10:00 AM ET
-//   E2: Resumen 20 · 9:30 AM  9:30–10:00 AM ET
-//   E3: Resumen 20 · 3:30 PM  3:30–4:00 PM ET
-//   E4: Resumen 20 · 10:00 AM 10:00–11:00 AM ET
+//   6 ESTRATEGIAS — VERSIÓN OBJETIVA
+//   Ventanas = REQUISITO (no cuentan en score)
+//   Strike recomendado: ATM siempre
+//   E1: Bollinger 0DTE      vela 9:45 ET      · 3/4 · TP20 SL15
+//   E2: Resumen 20 + H1     9:30-10:00 ET     · 3/4 · TP20 SL15
+//   E3: Cierre c/dirección  3:30-3:58 ET      · 3/4 · salida 3:55 / SL10
+//   E4: Continuación        10:00-11:00 ET    · 3/4 · TP20 SL15
+//   E5: Semanal             Lun/Mar           · 4/5 · TP50 SL25
+//   E6: Swing (manual, gráfico diario)        · 4/5 · TP15 SL5 trailing
+//   Filtro universal: VIX &lt; 25 (verificar manualmente)
+//   Regla spread: si (ask-bid) &gt; 5% del contrato, NO entrar
+//
+//   NOTA: Estrategias sin probar. Validar con
+//   paper trading mínimo 2 meses.
 // ══════════════════════════════════════════
 
-// ── INPUTS GENERALES ──
-vix_max      = input.float(25.0, "VIX máximo para operar", group="Filtro Universal")
-min_e1       = input.int(6, "E1 — Mínimo condiciones (de 8)", group="Estrategia 1")
-min_e2       = input.int(7, "E2 — Mínimo condiciones (de 9)", group="Estrategia 2")
-min_e3       = input.int(7, "E3 — Mínimo condiciones (de 9)", group="Estrategia 3")
-min_e4       = input.int(7, "E4 — Mínimo condiciones (de 9)", group="Estrategia 4")
-
-// ── INPUTS INDICADORES ──
-bb_len       = input.int(20,    "BB Longitud",     group="Bollinger")
-bb_mult      = input.float(2.0, "BB Desviación",   group="Bollinger")
-ema_fast     = input.int(7,     "EMA Rápida",      group="EMAs")
-ema_slow     = input.int(26,    "EMA Lenta",       group="EMAs")
-ema_big      = input.int(50,    "EMA Grande",      group="EMAs")
-macd_f       = input.int(12,    "MACD Rápida",     group="MACD")
-macd_s       = input.int(26,    "MACD Lenta",      group="MACD")
-macd_sig     = input.int(9,     "MACD Señal",      group="MACD")
-rsi_len      = input.int(14,    "RSI Longitud",    group="RSI")
-adx_len      = input.int(14,    "ADX Longitud",    group="ADX")
-adx_min_e2   = input.int(20,    "ADX mínimo E2",   group="ADX")
-adx_min_e4   = input.int(30,    "ADX mínimo E4",   group="ADX")
-show_table   = input.bool(true, "Mostrar tabla",   group="Visual")
-show_signals = input.bool(true, "Mostrar señales", group="Visual")
+// ── INPUTS ──
+min_e1 = input.int(3, "E1 mínimo (de 4)", group="Mínimos")
+min_e2 = input.int(3, "E2 mínimo (de 4)", group="Mínimos")
+min_e3 = input.int(3, "E3 mínimo (de 4)", group="Mínimos")
+min_e4 = input.int(3, "E4 mínimo (de 4)", group="Mínimos")
+min_e5 = input.int(4, "E5 mínimo (de 5)", group="Mínimos")
+adx_e4_min = input.int(25, "E4 ADX mínimo", group="ADX")
+adx_e5_min = input.int(20, "E5 ADX mínimo", group="ADX")
+res_pct = input.float(0.3, "Umbral resistencia/soporte %", group="E2") / 100
+mom_pct = input.float(0.3, "E4 momentum mínimo %", group="E4") / 100
+show_table = input.bool(true, "Mostrar tabla", group="Visual")
+show_sig = input.bool(true, "Mostrar señales", group="Visual")
 
 // ── HORA NY ──
-ny_hour  = hour(time,   "America/New_York")
-ny_min   = minute(time, "America/New_York")
-ny_total = ny_hour * 60 + ny_min
+ny_h = hour(time, "America/New_York")
+ny_m = minute(time, "America/New_York")
+ny_t = ny_h*60 + ny_m
+ny_dow = dayofweek(time, "America/New_York")
 
-// Ventanas horarias
-w_e1_e2 = ny_total >= (9*60+30)  and ny_total < (10*60)     // 9:30–10:00
-w_e4    = ny_total >= (10*60)    and ny_total < (11*60)     // 10:00–11:00
-w_e3    = ny_total >= (15*60+30) and ny_total < (16*60)     // 3:30–4:00
-w_e3_safe = ny_total >= (15*60+30) and ny_total < (15*60+58) // hasta 3:58
+// Ventanas — REQUISITOS, no condiciones
+is_vela945 = (ny_h==9 and ny_m&gt;=45)
+w_e2 = ny_t &gt;= (9*60+30) and ny_t &lt; (10*60)
+w_e4 = ny_t &gt;= (10*60) and ny_t &lt; (11*60)
+w_e3 = ny_t &gt;= (15*60+30) and ny_t &lt; (15*60+58)
+is_mon = ny_dow==2
+is_tue = ny_dow==3
+is_thu = ny_dow==5
+w_e5 = (is_mon or is_tue) and ny_t &gt;= (9*60+30) and ny_t &lt; (11*60)
 
-// ── BOLLINGER BANDS ──
-[bb_mid, bb_upper, bb_lower] = ta.bb(close, bb_len, bb_mult)
-bb_width      = bb_upper - bb_lower
-bb_expanding  = bb_width > bb_width[1] * 1.01
-inside_bb     = open > bb_lower and open < bb_upper
+// ── INDICADORES BASE ──
+[bb_mid, bb_up, bb_lo] = ta.bb(close, 20, 2)
+inside_bb = open &gt; bb_lo and open &lt; bb_up
+ema7  = ta.ema(close, 7)
+ema26 = ta.ema(close, 26)
+vwap_v = ta.vwap(hlc3)
+above_vwap = close &gt; vwap_v
+below_vwap = close &lt; vwap_v
+[dip, dim, adx_v] = ta.dmi(14, 14)
+vol_avg = ta.sma(volume, 5)
+vol_high = volume &gt; vol_avg
 
-// ── EMAs ──
-ema7  = ta.ema(close, ema_fast)
-ema26 = ta.ema(close, ema_slow)
-ema50 = ta.ema(close, ema_big)
+// Cuerpo sólido = cuerpo &gt; 50% del rango
+rng = high - low
+body = math.abs(close - open)
+solid = rng &gt; 0 and body &gt; rng * 0.5
+bull_solid = close &gt; open and solid
+bear_solid = close &lt; open and solid
 
-// ── VWAP ──
-vwap_val = ta.vwap(hlc3)
-above_vwap = close > vwap_val
-below_vwap = close < vwap_val
+// Vela 9:30 previa (para E1) — con cuerpo sólido
+v930_bull = close[1] &gt; open[1] and (high[1]-low[1] &gt; 0) and math.abs(close[1]-open[1]) &gt; (high[1]-low[1])*0.5
+v930_bear = close[1] &lt; open[1] and (high[1]-low[1] &gt; 0) and math.abs(close[1]-open[1]) &gt; (high[1]-low[1])*0.5
 
-// ── MACD ──
-[macd_line, signal_line, hist] = ta.macd(close, macd_f, macd_s, macd_sig)
-macd_bull = hist > 0
-macd_bear = hist < 0
+// ── TENDENCIA H1 OBJETIVA (para E2) ──
+// EMA20 H1 subió 3 velas H1 consecutivas + precio sobre/bajo ella
+ema20_h1_0 = request.security(syminfo.tickerid, "60", ta.ema(close,20))
+ema20_h1_1 = request.security(syminfo.tickerid, "60", ta.ema(close,20)[1])
+ema20_h1_2 = request.security(syminfo.tickerid, "60", ta.ema(close,20)[2])
+ema20_h1_3 = request.security(syminfo.tickerid, "60", ta.ema(close,20)[3])
+h1_bull = ema20_h1_0 &gt; ema20_h1_1 and ema20_h1_1 &gt; ema20_h1_2 and ema20_h1_2 &gt; ema20_h1_3 and close &gt; ema20_h1_0
+h1_bear = ema20_h1_0 &lt; ema20_h1_1 and ema20_h1_1 &lt; ema20_h1_2 and ema20_h1_2 &lt; ema20_h1_3 and close &lt; ema20_h1_0
 
-// ── RSI ──
-rsi = ta.rsi(close, rsi_len)
-rsi_call = rsi > 50 and rsi < 70
-rsi_put  = rsi > 30 and rsi < 50
-rsi_safe = rsi > 30 and rsi < 70
-
-// ── ADX ──
-[di_plus, di_minus, adx_val] = ta.dmi(adx_len, adx_len)
-adx_ok_e2 = adx_val > adx_min_e2
-adx_ok_e4 = adx_val > adx_min_e4
-
-// ── VOLUMEN ──
-vol_avg  = ta.sma(volume, 5)
-vol_high = volume > vol_avg * 1.1
-
-// ── VELA ──
-bull_candle   = close > open
-bear_candle   = close < open
-candle_body   = math.abs(close - open)
-candle_range  = high - low
-strong_candle = candle_body > candle_range * 0.6
+// ── RESISTENCIA/SOPORTE OBJETIVO (para E2) ──
+pd_high = request.security(syminfo.tickerid, "D", high[1])
+pd_low  = request.security(syminfo.tickerid, "D", low[1])
+no_res = pd_high &gt; close * (1 + res_pct)   // máx día anterior a más de 0.3% arriba
+no_sup = pd_low  &lt; close * (1 - res_pct)   // mín día anterior a más de 0.3% abajo
 
 // ── DIRECCIÓN DEL DÍA (para E3) ──
-day_open    = request.security(syminfo.tickerid, "D", open)
-day_change  = (close - day_open) / day_open * 100
-day_bull    = day_change > 1.0
-day_bear    = day_change < -1.0
+day_open = request.security(syminfo.tickerid, "D", open)
+day_chg = (close - day_open) / day_open
+day_up = day_chg &gt; 0.01
+day_down = day_chg &lt; -0.01
 
-// ── MOMENTUM DESDE APERTURA (para E4) ──
-open_930    = request.security(syminfo.tickerid, "D", open)
-momentum_up   = (close - open_930) / open_930 * 100 > 0.3
-momentum_down = (close - open_930) / open_930 * 100 < -0.3
+// ── MOMENTUM DESDE 9:30 (para E4) ──
+mom_up = day_chg &gt; mom_pct
+mom_down = day_chg &lt; -mom_pct
 
-// ── NIVEL PIVOT (simplificado) ──
-prev_high = request.security(syminfo.tickerid, "D", high[1])
-prev_low  = request.security(syminfo.tickerid, "D", low[1])
-no_resist_above = close < prev_high * 0.998
-no_support_below = close > prev_low * 1.002
+// ── TENDENCIA DIARIA OBJETIVA (para E5) ──
+ema20_d0 = request.security(syminfo.tickerid, "D", ta.ema(close,20))
+ema20_d1 = request.security(syminfo.tickerid, "D", ta.ema(close,20)[1])
+ema20_d2 = request.security(syminfo.tickerid, "D", ta.ema(close,20)[2])
+ema20_d3 = request.security(syminfo.tickerid, "D", ta.ema(close,20)[3])
+wk_bull = ema20_d0 &gt; ema20_d1 and ema20_d1 &gt; ema20_d2 and ema20_d2 &gt; ema20_d3 and close &gt; ema20_d0
+wk_bear = ema20_d0 &lt; ema20_d1 and ema20_d1 &lt; ema20_d2 and ema20_d2 &lt; ema20_d3 and close &lt; ema20_d0
 
-// ══════════════════════════════════════════
-//   ESTRATEGIA 1 — BOLLINGER 0DTE
-//   9:30–10:00 AM ET
-//   Take Profit: 50% | Stop Loss: 25%
-// ══════════════════════════════════════════
+// ── RANGO SEMANA ANTERIOR (requisito E5: &lt; 3%) ──
+pw_high = request.security(syminfo.tickerid, "W", high[1])
+pw_low  = request.security(syminfo.tickerid, "W", low[1])
+pw_range_ok = pw_low &gt; 0 and (pw_high - pw_low) / pw_low &lt; 0.03
 
-e1_c1 = w_e1_e2
-e1_c2 = inside_bb
-e1_c3 = bb_expanding
-e1_c4 = above_vwap
-e1_c5 = ema7 > ema26 and ema26 > ema50
-e1_c6 = macd_bull
-e1_c7 = rsi_call
-e1_c8 = bull_candle
-
-e1_p1 = w_e1_e2
-e1_p2 = inside_bb
-e1_p3 = bb_expanding
-e1_p4 = below_vwap
-e1_p5 = ema7 < ema26 and ema26 < ema50
-e1_p6 = macd_bear
-e1_p7 = rsi_put
-e1_p8 = bear_candle
-
-e1_call_score = (e1_c1?1:0)+(e1_c2?1:0)+(e1_c3?1:0)+(e1_c4?1:0)+(e1_c5?1:0)+(e1_c6?1:0)+(e1_c7?1:0)+(e1_c8?1:0)
-e1_put_score  = (e1_p1?1:0)+(e1_p2?1:0)+(e1_p3?1:0)+(e1_p4?1:0)+(e1_p5?1:0)+(e1_p6?1:0)+(e1_p7?1:0)+(e1_p8?1:0)
-
-e1_mandatory_call = e1_c1 and e1_c2 and e1_c3
-e1_mandatory_put  = e1_p1 and e1_p2 and e1_p3
-
-e1_call = e1_mandatory_call and e1_call_score >= min_e1
-e1_put  = e1_mandatory_put  and e1_put_score  >= min_e1
+// ── StochRSI (para E5): cruce alcista bajo 50 en últimas 3 velas ──
+rsi_s = ta.rsi(close,14)
+stoch_raw = ta.stoch(rsi_s, rsi_s, rsi_s, 14)
+stoch_k = ta.sma(stoch_raw, 3)
+stoch_d = ta.sma(stoch_k, 3)
+cross_up = ta.crossover(stoch_k, stoch_d) and stoch_k &lt; 50
+cross_dn = ta.crossunder(stoch_k, stoch_d) and stoch_k &gt; 50
+stochrsi_bull = cross_up or cross_up[1] or cross_up[2]
+stochrsi_bear = cross_dn or cross_dn[1] or cross_dn[2]
 
 // ══════════════════════════════════════════
-//   ESTRATEGIA 2 — RESUMEN 20 · 9:30 AM
-//   9:30–10:00 AM ET
-//   Take Profit: 30% | Stop Loss: 15%
+//   E1 — BOLLINGER 0DTE · vela 9:45 · 3/4
+//   Requisito: is_vela945
 // ══════════════════════════════════════════
-
-e2_c1 = w_e1_e2
-e2_c2 = inside_bb
-e2_c3 = bb_expanding
-e2_c4 = above_vwap
-e2_c5 = ema7 > ema26 and ema26 > ema50
-e2_c6 = no_resist_above
-e2_c7 = macd_bull
-e2_c8 = rsi_call
-e2_c9 = bull_candle and strong_candle and vol_high
-
-e2_p1 = w_e1_e2
-e2_p2 = inside_bb
-e2_p3 = bb_expanding
-e2_p4 = below_vwap
-e2_p5 = ema7 < ema26 and ema26 < ema50
-e2_p6 = no_support_below
-e2_p7 = macd_bear
-e2_p8 = rsi_put
-e2_p9 = bear_candle and strong_candle and vol_high
-
-e2_call_score = (e2_c1?1:0)+(e2_c2?1:0)+(e2_c3?1:0)+(e2_c4?1:0)+(e2_c5?1:0)+(e2_c6?1:0)+(e2_c7?1:0)+(e2_c8?1:0)+(e2_c9?1:0)
-e2_put_score  = (e2_p1?1:0)+(e2_p2?1:0)+(e2_p3?1:0)+(e2_p4?1:0)+(e2_p5?1:0)+(e2_p6?1:0)+(e2_p7?1:0)+(e2_p8?1:0)+(e2_p9?1:0)
-
-e2_mandatory_call = e2_c1 and e2_c2 and e2_c3 and e2_c4
-e2_mandatory_put  = e2_p1 and e2_p2 and e2_p3 and e2_p4
-
-e2_call = e2_mandatory_call and e2_call_score >= min_e2
-e2_put  = e2_mandatory_put  and e2_put_score  >= min_e2
+e1c_s = (inside_bb?1:0) + (above_vwap?1:0) + ((ema7&gt;ema26)?1:0) + (v930_bull?1:0)
+e1p_s = (inside_bb?1:0) + (below_vwap?1:0) + ((ema7&lt;ema26)?1:0) + (v930_bear?1:0)
+e1_call = is_vela945 and e1c_s &gt;= min_e1
+e1_put  = is_vela945 and e1p_s &gt;= min_e1
 
 // ══════════════════════════════════════════
-//   ESTRATEGIA 3 — RESUMEN 20 · 3:30 PM
-//   3:30–4:00 PM ET (vender antes 3:58)
-//   Take Profit: 20% | Stop Loss: 10%
+//   E2 — RESUMEN 20 + H1 · 3/4
+//   Requisitos: w_e2 + tendencia H1 definida
 // ══════════════════════════════════════════
-
-e3_c1 = w_e3_safe
-e3_c2 = day_bull
-e3_c3 = above_vwap
-e3_c4 = inside_bb
-e3_c5 = bb_expanding
-e3_c6 = ema7 > ema26
-e3_c7 = macd_bull
-e3_c8 = rsi_call
-e3_c9 = bull_candle and vol_high
-
-e3_p1 = w_e3_safe
-e3_p2 = day_bear
-e3_p3 = below_vwap
-e3_p4 = inside_bb
-e3_p5 = bb_expanding
-e3_p6 = ema7 < ema26
-e3_p7 = macd_bear
-e3_p8 = rsi_put
-e3_p9 = bear_candle and vol_high
-
-e3_call_score = (e3_c1?1:0)+(e3_c2?1:0)+(e3_c3?1:0)+(e3_c4?1:0)+(e3_c5?1:0)+(e3_c6?1:0)+(e3_c7?1:0)+(e3_c8?1:0)+(e3_c9?1:0)
-e3_put_score  = (e3_p1?1:0)+(e3_p2?1:0)+(e3_p3?1:0)+(e3_p4?1:0)+(e3_p5?1:0)+(e3_p6?1:0)+(e3_p7?1:0)+(e3_p8?1:0)+(e3_p9?1:0)
-
-e3_mandatory_call = e3_c1 and e3_c2 and e3_c3
-e3_mandatory_put  = e3_p1 and e3_p2 and e3_p3
-
-e3_call = e3_mandatory_call and e3_call_score >= min_e3
-e3_put  = e3_mandatory_put  and e3_put_score  >= min_e3
+e2c_s = (inside_bb?1:0) + (above_vwap?1:0) + (no_res?1:0) + ((bull_solid and vol_high)?1:0)
+e2p_s = (inside_bb?1:0) + (below_vwap?1:0) + (no_sup?1:0) + ((bear_solid and vol_high)?1:0)
+e2_call = w_e2 and h1_bull and e2c_s &gt;= min_e2
+e2_put  = w_e2 and h1_bear and e2p_s &gt;= min_e2
 
 // ══════════════════════════════════════════
-//   ESTRATEGIA 4 — RESUMEN 20 · 10:00 AM
-//   10:00–11:00 AM ET
-//   Take Profit: 25% | Stop Loss: 15%
+//   E3 — CIERRE CON DIRECCIÓN · 3/4
+//   Requisitos: w_e3 + día movió &gt;1%
+//   SALIDA: 3:55 PM o SL 10%
 // ══════════════════════════════════════════
-
-e4_c1 = w_e4
-e4_c2 = above_vwap
-e4_c3 = inside_bb
-e4_c4 = bb_expanding
-e4_c5 = ema7 > ema26 and ema26 > ema50
-e4_c6 = macd_bull
-e4_c7 = rsi_call
-e4_c8 = adx_ok_e4
-e4_c9 = bull_candle and strong_candle and vol_high and momentum_up
-
-e4_p1 = w_e4
-e4_p2 = below_vwap
-e4_p3 = inside_bb
-e4_p4 = bb_expanding
-e4_p5 = ema7 < ema26 and ema26 < ema50
-e4_p6 = macd_bear
-e4_p7 = rsi_put
-e4_p8 = adx_ok_e4
-e4_p9 = bear_candle and strong_candle and vol_high and momentum_down
-
-e4_call_score = (e4_c1?1:0)+(e4_c2?1:0)+(e4_c3?1:0)+(e4_c4?1:0)+(e4_c5?1:0)+(e4_c6?1:0)+(e4_c7?1:0)+(e4_c8?1:0)+(e4_c9?1:0)
-e4_put_score  = (e4_p1?1:0)+(e4_p2?1:0)+(e4_p3?1:0)+(e4_p4?1:0)+(e4_p5?1:0)+(e4_p6?1:0)+(e4_p7?1:0)+(e4_p8?1:0)+(e4_p9?1:0)
-
-e4_mandatory_call = e4_c1 and e4_c2 and e4_c3 and e4_c4
-e4_mandatory_put  = e4_p1 and e4_p2 and e4_p3 and e4_p4
-
-e4_call = e4_mandatory_call and e4_call_score >= min_e4
-e4_put  = e4_mandatory_put  and e4_put_score  >= min_e4
-
+e3c_s = (above_vwap?1:0) + (inside_bb?1:0) + ((ema7&gt;ema26)?1:0) + ((close&gt;open and vol_high)?1:0)
+e3p_s = (below_vwap?1:0) + (inside_bb?1:0) + ((ema7&lt;ema26)?1:0) + ((close&lt;open and vol_high)?1:0)
+e3_call = w_e3 and day_up and e3c_s &gt;= min_e3
+e3_put  = w_e3 and day_down and e3p_s &gt;= min_e3
 
 // ══════════════════════════════════════════
-//   ESTRATEGIA 5 — SEMANAL SPY/QQQ
-//   Entrada Lunes/Martes 9:30–11:00 AM ET
-//   Expiración: Viernes misma semana
-//   Take Profit: 50% | Stop Loss: 25%
-//   Variables nuevas: StochRSI + Regla pérdida semanal
+//   E4 — CONTINUACIÓN · 3/4
+//   Requisito: w_e4
 // ══════════════════════════════════════════
-
-// Día de la semana
-ny_dow   = dayofweek(time, "America/New_York")
-is_mon   = ny_dow == 2
-is_tue   = ny_dow == 3
-is_wed   = ny_dow == 4
-is_thu   = ny_dow == 5
-
-// Ventana E5: Lunes o Martes 9:30–11:00 AM
-w_e5 = (is_mon or is_tue) and ny_total >= (9*60+30) and ny_total < (11*60)
-
-// Tendencia semanal — EMA 20 diaria
-ema20_daily      = request.security(syminfo.tickerid, "D", ta.ema(close, 20))
-ema20_daily_prev = request.security(syminfo.tickerid, "D", ta.ema(close, 20)[1])
-weekly_bull      = ema20_daily > ema20_daily_prev
-weekly_bear      = ema20_daily < ema20_daily_prev
-
-// Stochastic RSI (nuevo)
-stoch_k_len  = input.int(14, "StochRSI K", group="Stoch RSI")
-stoch_d_len  = input.int(3,  "StochRSI D", group="Stoch RSI")
-stoch_smooth = input.int(3,  "StochRSI Smooth", group="Stoch RSI")
-rsi_stoch    = ta.rsi(close, stoch_k_len)
-stoch_raw    = ta.stoch(rsi_stoch, rsi_stoch, rsi_stoch, stoch_k_len)
-stoch_k      = ta.sma(stoch_raw, stoch_smooth)
-stoch_d      = ta.sma(stoch_k, stoch_d_len)
-stochrsi_bull = stoch_k > stoch_d and stoch_k < 80 and stoch_k > stoch_k[1]
-stochrsi_bear = stoch_k < stoch_d and stoch_k > 20 and stoch_k < stoch_k[1]
-
-// Alerta jueves
-thu_warning = is_thu and ny_total >= (9*60+30) and ny_total < (16*60)
-
-// Condiciones E5 CALL — 11 condiciones
-e5_c1  = w_e5
-e5_c2  = weekly_bull
-e5_c3  = above_vwap
-e5_c4  = inside_bb
-e5_c5  = bb_expanding
-e5_c6  = ema7 > ema26 and ema26 > ema50
-e5_c7  = macd_bull
-e5_c8  = rsi_call
-e5_c9  = stochrsi_bull
-e5_c10 = adx_ok_e2
-e5_c11 = bull_candle and strong_candle and vol_high
-
-// Condiciones E5 PUT — 11 condiciones
-e5_p1  = w_e5
-e5_p2  = weekly_bear
-e5_p3  = below_vwap
-e5_p4  = inside_bb
-e5_p5  = bb_expanding
-e5_p6  = ema7 < ema26 and ema26 < ema50
-e5_p7  = macd_bear
-e5_p8  = rsi_put
-e5_p9  = stochrsi_bear
-e5_p10 = adx_ok_e2
-e5_p11 = bear_candle and strong_candle and vol_high
-
-e5_call_score = (e5_c1?1:0)+(e5_c2?1:0)+(e5_c3?1:0)+(e5_c4?1:0)+(e5_c5?1:0)+(e5_c6?1:0)+(e5_c7?1:0)+(e5_c8?1:0)+(e5_c9?1:0)+(e5_c10?1:0)+(e5_c11?1:0)
-e5_put_score  = (e5_p1?1:0)+(e5_p2?1:0)+(e5_p3?1:0)+(e5_p4?1:0)+(e5_p5?1:0)+(e5_p6?1:0)+(e5_p7?1:0)+(e5_p8?1:0)+(e5_p9?1:0)+(e5_p10?1:0)+(e5_p11?1:0)
-
-e5_mandatory_call = e5_c1 and e5_c2 and e5_c3
-e5_mandatory_put  = e5_p1 and e5_p2 and e5_p3
-
-e5_call = e5_mandatory_call and e5_call_score >= 9
-e5_put  = e5_mandatory_put  and e5_put_score  >= 9
-
+e4c_s = (above_vwap?1:0) + ((ema7&gt;ema26)?1:0) + ((adx_v&gt;adx_e4_min)?1:0) + ((mom_up and bull_solid and vol_high)?1:0)
+e4p_s = (below_vwap?1:0) + ((ema7&lt;ema26)?1:0) + ((adx_v&gt;adx_e4_min)?1:0) + ((mom_down and bear_solid and vol_high)?1:0)
+e4_call = w_e4 and e4c_s &gt;= min_e4
+e4_put  = w_e4 and e4p_s &gt;= min_e4
 
 // ══════════════════════════════════════════
-//   SEÑALES COMBINADAS
+//   E5 — SEMANAL · 4/5
+//   Requisitos: w_e5 + tendencia diaria + rango semana previa &lt;3%
 // ══════════════════════════════════════════
-
-any_call = e1_call or e2_call or e3_call or e4_call or e5_call
-any_put  = e1_put  or e2_put  or e3_put  or e4_put  or e5_put
-
-// ══════════════════════════════════════════
-//   VISUALIZACIÓN
-// ══════════════════════════════════════════
-
-// Fondos de ventanas horarias
-bgcolor(w_e1_e2  ? color.new(color.green,  92) : na, title="Ventana E1/E2")
-bgcolor(w_e5     ? color.new(color.yellow, 92) : na, title="Ventana E5 Semanal")
-bgcolor(w_e4     ? color.new(color.blue,   92) : na, title="Ventana E4")
-bgcolor(w_e3_safe? color.new(color.orange, 92) : na, title="Ventana E3")
-
-// EMAs
-plot(ema7,  "EMA 7",  color=color.new(color.green,  0), linewidth=1)
-plot(ema26, "EMA 26", color=color.new(color.orange, 0), linewidth=1)
-plot(ema50, "EMA 50", color=color.new(color.red,    0), linewidth=2)
-
-// VWAP
-plot(vwap_val, "VWAP", color=color.new(color.purple, 0), linewidth=2)
-
-// Señales E1
-plotshape(show_signals and e1_call, "E1 CALL", location.belowbar, style=shape.triangleup,   color=color.new(color.green, 0), textcolor=color.white, text="E1\nCALL", size=size.small)
-plotshape(show_signals and e1_put,  "E1 PUT",  location.abovebar, style=shape.triangledown, color=color.new(color.red,   0), textcolor=color.white, text="E1\nPUT",  size=size.small)
-
-// Señales E2
-plotshape(show_signals and e2_call, "E2 CALL", location.belowbar, style=shape.labelup,   color=color.new(color.lime,   0), textcolor=color.white, text="E2 CALL\n"+str.tostring(e2_call_score)+"/9", size=size.normal)
-plotshape(show_signals and e2_put,  "E2 PUT",  location.abovebar, style=shape.labeldown, color=color.new(color.maroon, 0), textcolor=color.white, text="E2 PUT\n"+str.tostring(e2_put_score)+"/9",  size=size.normal)
-
-// Señales E3
-plotshape(show_signals and e3_call, "E3 CALL", location.belowbar, style=shape.labelup,   color=color.new(color.teal,   0), textcolor=color.white, text="E3 CALL\n"+str.tostring(e3_call_score)+"/9", size=size.normal)
-plotshape(show_signals and e3_put,  "E3 PUT",  location.abovebar, style=shape.labeldown, color=color.new(color.purple, 0), textcolor=color.white, text="E3 PUT\n"+str.tostring(e3_put_score)+"/9",  size=size.normal)
-
-// Señales E4
-plotshape(show_signals and e4_call, "E4 CALL", location.belowbar, style=shape.labelup,   color=color.new(color.aqua,   0), textcolor=color.white, text="E4 CALL\n"+str.tostring(e4_call_score)+"/9", size=size.normal)
-plotshape(show_signals and e4_put,  "E4 PUT",  location.abovebar, style=shape.labeldown, color=color.new(color.fuchsia,0), textcolor=color.white, text="E4 PUT\n"+str.tostring(e4_put_score)+"/9",  size=size.normal)
+e5c_s = (above_vwap?1:0) + ((ema7&gt;ema26)?1:0) + (inside_bb?1:0) + ((adx_v&gt;adx_e5_min)?1:0) + (stochrsi_bull?1:0)
+e5p_s = (below_vwap?1:0) + ((ema7&lt;ema26)?1:0) + (inside_bb?1:0) + ((adx_v&gt;adx_e5_min)?1:0) + (stochrsi_bear?1:0)
+e5_call = w_e5 and wk_bull and pw_range_ok and e5c_s &gt;= min_e5
+e5_put  = w_e5 and wk_bear and pw_range_ok and e5p_s &gt;= min_e5
 
 // ══════════════════════════════════════════
-//   TABLA EN TIEMPO REAL
+//   VISUAL
 // ══════════════════════════════════════════
+bgcolor(w_e2 ? color.new(color.green,93) : na, title="Ventana E1/E2")
+bgcolor(w_e4 ? color.new(color.blue,93)  : na, title="Ventana E4")
+bgcolor(w_e3 ? color.new(color.orange,93): na, title="Ventana E3")
+bgcolor(w_e5 ? color.new(color.yellow,94): na, title="Ventana E5")
 
+plot(ema7,  "EMA7",  color=color.new(color.green,0))
+plot(ema26, "EMA26", color=color.new(color.orange,0))
+plot(vwap_v,"VWAP",  color=color.new(color.purple,0), linewidth=2)
+
+plotshape(show_sig and e1_call, "E1 CALL", location.belowbar, shape.triangleup,   color=color.new(color.green,0),  text="E1", textcolor=color.white, size=size.small)
+plotshape(show_sig and e1_put,  "E1 PUT",  location.abovebar, shape.triangledown, color=color.new(color.red,0),    text="E1", textcolor=color.white, size=size.small)
+plotshape(show_sig and e2_call, "E2 CALL", location.belowbar, shape.labelup,   color=color.new(color.lime,0),    text="E2 CALL", textcolor=color.white, size=size.normal)
+plotshape(show_sig and e2_put,  "E2 PUT",  location.abovebar, shape.labeldown, color=color.new(color.maroon,0),  text="E2 PUT",  textcolor=color.white, size=size.normal)
+plotshape(show_sig and e3_call, "E3 CALL", location.belowbar, shape.labelup,   color=color.new(color.teal,0),    text="E3 CALL", textcolor=color.white, size=size.normal)
+plotshape(show_sig and e3_put,  "E3 PUT",  location.abovebar, shape.labeldown, color=color.new(color.purple,0),  text="E3 PUT",  textcolor=color.white, size=size.normal)
+plotshape(show_sig and e4_call, "E4 CALL", location.belowbar, shape.labelup,   color=color.new(color.aqua,0),    text="E4 CALL", textcolor=color.white, size=size.normal)
+plotshape(show_sig and e4_put,  "E4 PUT",  location.abovebar, shape.labeldown, color=color.new(color.fuchsia,0), text="E4 PUT",  textcolor=color.white, size=size.normal)
+plotshape(show_sig and e5_call, "E5 CALL", location.belowbar, shape.labelup,   color=color.new(color.yellow,0),  text="E5 CALL", textcolor=color.black, size=size.large)
+plotshape(show_sig and e5_put,  "E5 PUT",  location.abovebar, shape.labeldown, color=color.new(color.orange,0),  text="E5 PUT",  textcolor=color.black, size=size.large)
+
+bgcolor(is_thu and (e5_call[1] or e5_put[1]) ? color.new(color.orange,80) : na, title="Jueves E5")
+
+// ── TABLA ──
 if show_table and barstate.islast
-    var table t = table.new(position.top_right, 5, 12,
-                            bgcolor=color.new(color.black, 15),
-                            border_color=color.gray, border_width=1,
-                            frame_color=color.gray, frame_width=1)
+    var table t = table.new(position.top_right, 3, 7, bgcolor=color.new(color.black,15), border_color=color.gray, border_width=1)
+    table.cell(t,0,0,"ESTRAT",text_color=color.white,bgcolor=color.new(color.navy,10),text_size=size.tiny)
+    table.cell(t,1,0,"SCORE", text_color=color.white,bgcolor=color.new(color.navy,10),text_size=size.tiny)
+    table.cell(t,2,0,"SEÑAL", text_color=color.white,bgcolor=color.new(color.navy,10),text_size=size.tiny)
+    rows = array.from("E1","E2","E3","E4","E5")
+    cscore = array.from(e1c_s,e2c_s,e3c_s,e4c_s,e5c_s)
+    pscore = array.from(e1p_s,e2p_s,e3p_s,e4p_s,e5p_s)
+    cmax = array.from(4,4,4,4,5)
+    ccall = array.from(e1_call,e2_call,e3_call,e4_call,e5_call)
+    cput  = array.from(e1_put,e2_put,e3_put,e4_put,e5_put)
+    for i = 0 to 4
+        sc = math.max(array.get(cscore,i), array.get(pscore,i))
+        sig = array.get(ccall,i) ? "✅CALL" : array.get(cput,i) ? "✅PUT" : "—"
+        sigcol = (array.get(ccall,i) or array.get(cput,i)) ? color.new(color.green,20) : color.new(color.gray,60)
+        table.cell(t,0,i+1,array.get(rows,i),text_color=color.white,bgcolor=color.new(color.gray,50),text_size=size.tiny)
+        table.cell(t,1,i+1,str.tostring(sc)+"/"+str.tostring(array.get(cmax,i)),text_color=color.white,bgcolor=color.new(color.gray,60),text_size=size.tiny)
+        table.cell(t,2,i+1,sig,text_color=color.white,bgcolor=sigcol,text_size=size.tiny)
 
-    // Headers
-    table.cell(t, 0, 0, "CONDICIÓN",    text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
-    table.cell(t, 1, 0, "E1",           text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
-    table.cell(t, 2, 0, "E2",           text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
-    table.cell(t, 3, 0, "E3",           text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
-    table.cell(t, 4, 0, "E4",           text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
+// ── ALERTAS ──
+alertcondition(e1_call, "E1 CALL", "✅ E1 CALL {{ticker}} ATM\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E1&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e1_put,  "E1 PUT",  "✅ E1 PUT {{ticker}} ATM\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E1&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e2_call, "E2 CALL", "✅ E2 CALL {{ticker}} ATM (H1 alcista)\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E2&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e2_put,  "E2 PUT",  "✅ E2 PUT {{ticker}} ATM (H1 bajista)\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E2&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e3_call, "E3 CALL", "✅ E3 CALL {{ticker}} ATM\nPrecio: {{close}}\nSL10 · ⚠️VENDER 3:55 PM SIN EXCEPCIÓN\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E3&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e3_put,  "E3 PUT",  "✅ E3 PUT {{ticker}} ATM\nPrecio: {{close}}\nSL10 · ⚠️VENDER 3:55 PM SIN EXCEPCIÓN\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E3&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e4_call, "E4 CALL", "✅ E4 CALL {{ticker}} ATM\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E4&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e4_put,  "E4 PUT",  "✅ E4 PUT {{ticker}} ATM\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E4&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e5_call, "E5 CALL", "✅ E5 CALL SEMANAL {{ticker}} ATM exp. viernes\nPrecio: {{close}}\nTP50 SL25 · Verificar: sin Fed/CPI esta semana\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E5&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e5_put,  "E5 PUT",  "✅ E5 PUT SEMANAL {{ticker}} ATM exp. viernes\nPrecio: {{close}}\nTP50 SL25 · Verificar: sin Fed/CPI esta semana\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E5&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(is_thu and (e5_call[1] or e5_put[1]), "E5 Jueves", "⚠️ JUEVES — Revisa tu contrato semanal E5. Si tienes +35% VENDE HOY.")
 
-    // Condiciones comunes
-    conds = array.from("① Ventana horaria","② Dentro BB","③ BB expandiéndose","④ VWAP a favor","⑤ EMAs alineadas","⑥ Sin S/R encima","⑦ MACD a favor","⑧ RSI en rango","⑨ Vela+Volumen","⑩ ADX/Momentum")
-
-    // CALL scores por estrategia
-    e1_arr = array.from(e1_c1,e1_c2,e1_c3,e1_c4,e1_c5,false,e1_c6,e1_c7,e1_c8,false)
-    e2_arr = array.from(e2_c1,e2_c2,e2_c3,e2_c4,e2_c5,e2_c6,e2_c7,e2_c8,e2_c9,false)
-    e3_arr = array.from(e3_c1,e3_c2,e3_c3,e3_c4,false,false,e3_c7,e3_c8,e3_c9,false)
-    e4_arr = array.from(e4_c1,e4_c3,e4_c4,e4_c2,e4_c5,false,e4_c6,e4_c7,e4_c9,e4_c8)
-
-    for i = 0 to 9
-        table.cell(t, 0, i+1, array.get(conds, i), text_color=color.white, text_size=size.tiny, bgcolor=color.new(color.gray,60))
-
-        v1 = array.get(e1_arr, i)
-        v2 = array.get(e2_arr, i)
-        v3 = array.get(e3_arr, i)
-        v4 = array.get(e4_arr, i)
-
-        table.cell(t,1,i+1,v1?"✅":"❌",text_color=v1?color.green:color.red,bgcolor=v1?color.new(color.green,80):color.new(color.red,80),text_size=size.tiny)
-        table.cell(t,2,i+1,v2?"✅":"❌",text_color=v2?color.green:color.red,bgcolor=v2?color.new(color.green,80):color.new(color.red,80),text_size=size.tiny)
-        table.cell(t,3,i+1,v3?"✅":"❌",text_color=v3?color.green:color.red,bgcolor=v3?color.new(color.green,80):color.new(color.red,80),text_size=size.tiny)
-        table.cell(t,4,i+1,v4?"✅":"❌",text_color=v4?color.green:color.red,bgcolor=v4?color.new(color.green,80):color.new(color.red,80),text_size=size.tiny)
-
-    // Scores finales
-    e1c_txt = e1_call ? "✅CALL "+str.tostring(e1_call_score)+"/8" : e1_put ? "✅PUT "+str.tostring(e1_put_score)+"/8" : str.tostring(math.max(e1_call_score,e1_put_score))+"/8"
-    e2c_txt = e2_call ? "✅CALL "+str.tostring(e2_call_score)+"/9" : e2_put ? "✅PUT "+str.tostring(e2_put_score)+"/9" : str.tostring(math.max(e2_call_score,e2_put_score))+"/9"
-    e3c_txt = e3_call ? "✅CALL "+str.tostring(e3_call_score)+"/9" : e3_put ? "✅PUT "+str.tostring(e3_put_score)+"/9" : str.tostring(math.max(e3_call_score,e3_put_score))+"/9"
-    e4c_txt = e4_call ? "✅CALL "+str.tostring(e4_call_score)+"/9" : e4_put ? "✅PUT "+str.tostring(e4_put_score)+"/9" : str.tostring(math.max(e4_call_score,e4_put_score))+"/9"
-
-    table.cell(t,0,11,"SEÑAL",     text_color=color.white,bgcolor=color.new(color.navy,10),text_size=size.tiny)
-    table.cell(t,1,11,e1c_txt,     text_color=color.white,bgcolor=(e1_call or e1_put)?color.new(color.green,20):color.new(color.gray,60),text_size=size.tiny)
-    table.cell(t,2,11,e2c_txt,     text_color=color.white,bgcolor=(e2_call or e2_put)?color.new(color.green,20):color.new(color.gray,60),text_size=size.tiny)
-    table.cell(t,3,11,e3c_txt,     text_color=color.white,bgcolor=(e3_call or e3_put)?color.new(color.green,20):color.new(color.gray,60),text_size=size.tiny)
-    table.cell(t,4,11,e4c_txt,     text_color=color.white,bgcolor=(e4_call or e4_put)?color.new(color.green,20):color.new(color.gray,60),text_size=size.tiny)
-
-
-// E5 Señales
-plotshape(show_signals and e5_call, "E5 CALL", location.belowbar, style=shape.labelup,   color=color.new(color.yellow, 0), textcolor=color.black, text="E5 CALL\n"+str.tostring(e5_call_score)+"/11", size=size.large)
-plotshape(show_signals and e5_put,  "E5 PUT",  location.abovebar, style=shape.labeldown, color=color.new(color.orange, 0), textcolor=color.black, text="E5 PUT\n"+str.tostring(e5_put_score)+"/11",  size=size.large)
-
-// Alerta jueves
-bgcolor(thu_warning ? color.new(color.orange, 85) : na, title="Jueves — revisar semanal")
-
-
-// ══════════════════════════════════════════
-//   ALERTAS
-// ══════════════════════════════════════════
-
-// E1 Alertas
-alertcondition(e1_call, "🟢 E1 CALL — Bollinger 0DTE",
-    "✅ E1 CALL — {{ticker}} M15\nScore: {{plot_0}}/8\nPrecio: {{close}}\nTP: 50% | SL: 25%\n9:30–10:00 ET")
-alertcondition(e1_put, "🔴 E1 PUT — Bollinger 0DTE",
-    "✅ E1 PUT — {{ticker}} M15\nScore: {{plot_0}}/8\nPrecio: {{close}}\nTP: 50% | SL: 25%\n9:30–10:00 ET")
-
-// E2 Alertas
-alertcondition(e2_call, "🟢 E2 CALL — Resumen 20 · 9:30 AM",
-    "✅ E2 CALL — {{ticker}} M15\nScore: {{plot_0}}/9\nPrecio: {{close}}\nTP: 30% | SL: 15%\n9:30–10:00 ET")
-alertcondition(e2_put, "🔴 E2 PUT — Resumen 20 · 9:30 AM",
-    "✅ E2 PUT — {{ticker}} M15\nScore: {{plot_0}}/9\nPrecio: {{close}}\nTP: 30% | SL: 15%\n9:30–10:00 ET")
-
-// E3 Alertas
-alertcondition(e3_call, "🟢 E3 CALL — Resumen 20 · 3:30 PM",
-    "✅ E3 CALL — {{ticker}} M15\nScore: {{plot_0}}/9\nPrecio: {{close}}\nTP: 20% | SL: 10%\n⚠️ VENDER ANTES 3:58 PM")
-alertcondition(e3_put, "🔴 E3 PUT — Resumen 20 · 3:30 PM",
-    "✅ E3 PUT — {{ticker}} M15\nScore: {{plot_0}}/9\nPrecio: {{close}}\nTP: 20% | SL: 10%\n⚠️ VENDER ANTES 3:58 PM")
-
-// E4 Alertas
-alertcondition(e4_call, "🟢 E4 CALL — Resumen 20 · 10:00 AM",
-    "✅ E4 CALL — {{ticker}} M15\nScore: {{plot_0}}/9\nPrecio: {{close}}\nTP: 25% | SL: 15%\n10:00–11:00 ET")
-alertcondition(e4_put, "🔴 E4 PUT — Resumen 20 · 10:00 AM",
-    "✅ E4 PUT — {{ticker}} M15\nScore: {{plot_0}}/9\nPrecio: {{close}}\nTP: 25% | SL: 15%\n10:00–11:00 ET")
-
-// Alerta general
-alertcondition(any_call or any_put, "⚡ SEÑAL — Ultimate Entry M15",
-    "⚡ SEÑAL DETECTADA — {{ticker}} M15\nPrecio: {{close}}\nRevisa el gráfico y ejecuta en IB")
-
-
-// E5 Alertas
-alertcondition(e5_call, "🟢 E5 CALL — Semanal SPY/QQQ",
-    "✅ E5 CALL SEMANAL — {{ticker}}\nScore: {{plot_0}}/10\nPrecio: {{close}}\nTP: 50% | SL: 25%\nExpiración: Viernes\nEntrada: Lunes/Martes 9:30–11:00 ET")
-alertcondition(e5_put, "🔴 E5 PUT — Semanal SPY/QQQ",
-    "✅ E5 PUT SEMANAL — {{ticker}}\nScore: {{plot_0}}/10\nPrecio: {{close}}\nTP: 50% | SL: 25%\nExpiración: Viernes\nEntrada: Lunes/Martes 9:30–11:00 ET")
-alertcondition(thu_warning and (e5_call[1] or e5_put[1]), "⚠️ E5 JUEVES — Revisar contrato semanal",
-    "⚠️ HOY ES JUEVES — Revisa tu contrato semanal\nSi tienes +35% de ganancia VENDE HOY\nNo esperes al viernes")
-
-
-// Plot oculto para score
-plot(math.max(e1_call_score, e2_call_score, e3_call_score, e4_call_score, e5_call_score), display=display.none, title="Score")
+any_sig = e1_call or e1_put or e2_call or e2_put or e3_call or e3_put or e4_call or e4_put or e5_call or e5_put
+alertcondition(any_sig, "Señal Ultimate", "⚡ Señal {{ticker}} {{close}} — revisa el gráfico")
+</pre>
 </div>
 
 <script>
-const script = `//@version=5
-indicator("📊 Pine Script Para Trading View", overlay=true, max_bars_back=500)
-
-// ══════════════════════════════════════════
-//   ULTIMATE ENTRY M15 — 4 ESTRATEGIAS
-//   E1: Bollinger 0DTE        9:30–10:00 AM ET
-//   E2: Resumen 20 · 9:30 AM  9:30–10:00 AM ET
-//   E3: Resumen 20 · 3:30 PM  3:30–4:00 PM ET
-//   E4: Resumen 20 · 10:00 AM 10:00–11:00 AM ET
-// ══════════════════════════════════════════
-
-// ── INPUTS GENERALES ──
-vix_max      = input.float(25.0, "VIX máximo para operar", group="Filtro Universal")
-min_e1       = input.int(6, "E1 — Mínimo condiciones (de 8)", group="Estrategia 1")
-min_e2       = input.int(7, "E2 — Mínimo condiciones (de 9)", group="Estrategia 2")
-min_e3       = input.int(7, "E3 — Mínimo condiciones (de 9)", group="Estrategia 3")
-min_e4       = input.int(7, "E4 — Mínimo condiciones (de 9)", group="Estrategia 4")
-
-// ── INPUTS INDICADORES ──
-bb_len       = input.int(20,    "BB Longitud",     group="Bollinger")
-bb_mult      = input.float(2.0, "BB Desviación",   group="Bollinger")
-ema_fast     = input.int(7,     "EMA Rápida",      group="EMAs")
-ema_slow     = input.int(26,    "EMA Lenta",       group="EMAs")
-ema_big      = input.int(50,    "EMA Grande",      group="EMAs")
-macd_f       = input.int(12,    "MACD Rápida",     group="MACD")
-macd_s       = input.int(26,    "MACD Lenta",      group="MACD")
-macd_sig     = input.int(9,     "MACD Señal",      group="MACD")
-rsi_len      = input.int(14,    "RSI Longitud",    group="RSI")
-adx_len      = input.int(14,    "ADX Longitud",    group="ADX")
-adx_min_e2   = input.int(20,    "ADX mínimo E2",   group="ADX")
-adx_min_e4   = input.int(30,    "ADX mínimo E4",   group="ADX")
-show_table   = input.bool(true, "Mostrar tabla",   group="Visual")
-show_signals = input.bool(true, "Mostrar señales", group="Visual")
-
-// ── HORA NY ──
-ny_hour  = hour(time,   "America/New_York")
-ny_min   = minute(time, "America/New_York")
-ny_total = ny_hour * 60 + ny_min
-
-// Ventanas horarias
-w_e1_e2 = ny_total >= (9*60+30)  and ny_total < (10*60)     // 9:30–10:00
-w_e4    = ny_total >= (10*60)    and ny_total < (11*60)     // 10:00–11:00
-w_e3    = ny_total >= (15*60+30) and ny_total < (16*60)     // 3:30–4:00
-w_e3_safe = ny_total >= (15*60+30) and ny_total < (15*60+58) // hasta 3:58
-
-// ── BOLLINGER BANDS ──
-[bb_mid, bb_upper, bb_lower] = ta.bb(close, bb_len, bb_mult)
-bb_width      = bb_upper - bb_lower
-bb_expanding  = bb_width > bb_width[1] * 1.01
-inside_bb     = open > bb_lower and open < bb_upper
-
-// ── EMAs ──
-ema7  = ta.ema(close, ema_fast)
-ema26 = ta.ema(close, ema_slow)
-ema50 = ta.ema(close, ema_big)
-
-// ── VWAP ──
-vwap_val = ta.vwap(hlc3)
-above_vwap = close > vwap_val
-below_vwap = close < vwap_val
-
-// ── MACD ──
-[macd_line, signal_line, hist] = ta.macd(close, macd_f, macd_s, macd_sig)
-macd_bull = hist > 0
-macd_bear = hist < 0
-
-// ── RSI ──
-rsi = ta.rsi(close, rsi_len)
-rsi_call = rsi > 50 and rsi < 70
-rsi_put  = rsi > 30 and rsi < 50
-rsi_safe = rsi > 30 and rsi < 70
-
-// ── ADX ──
-[di_plus, di_minus, adx_val] = ta.dmi(adx_len, adx_len)
-adx_ok_e2 = adx_val > adx_min_e2
-adx_ok_e4 = adx_val > adx_min_e4
-
-// ── VOLUMEN ──
-vol_avg  = ta.sma(volume, 5)
-vol_high = volume > vol_avg * 1.1
-
-// ── VELA ──
-bull_candle   = close > open
-bear_candle   = close < open
-candle_body   = math.abs(close - open)
-candle_range  = high - low
-strong_candle = candle_body > candle_range * 0.6
-
-// ── DIRECCIÓN DEL DÍA (para E3) ──
-day_open    = request.security(syminfo.tickerid, "D", open)
-day_change  = (close - day_open) / day_open * 100
-day_bull    = day_change > 1.0
-day_bear    = day_change < -1.0
-
-// ── MOMENTUM DESDE APERTURA (para E4) ──
-open_930    = request.security(syminfo.tickerid, "D", open)
-momentum_up   = (close - open_930) / open_930 * 100 > 0.3
-momentum_down = (close - open_930) / open_930 * 100 < -0.3
-
-// ── NIVEL PIVOT (simplificado) ──
-prev_high = request.security(syminfo.tickerid, "D", high[1])
-prev_low  = request.security(syminfo.tickerid, "D", low[1])
-no_resist_above = close < prev_high * 0.998
-no_support_below = close > prev_low * 1.002
-
-// ══════════════════════════════════════════
-//   ESTRATEGIA 1 — BOLLINGER 0DTE
-//   9:30–10:00 AM ET
-//   Take Profit: 50% | Stop Loss: 25%
-// ══════════════════════════════════════════
-
-e1_c1 = w_e1_e2
-e1_c2 = inside_bb
-e1_c3 = bb_expanding
-e1_c4 = above_vwap
-e1_c5 = ema7 > ema26 and ema26 > ema50
-e1_c6 = macd_bull
-e1_c7 = rsi_call
-e1_c8 = bull_candle
-
-e1_p1 = w_e1_e2
-e1_p2 = inside_bb
-e1_p3 = bb_expanding
-e1_p4 = below_vwap
-e1_p5 = ema7 < ema26 and ema26 < ema50
-e1_p6 = macd_bear
-e1_p7 = rsi_put
-e1_p8 = bear_candle
-
-e1_call_score = (e1_c1?1:0)+(e1_c2?1:0)+(e1_c3?1:0)+(e1_c4?1:0)+(e1_c5?1:0)+(e1_c6?1:0)+(e1_c7?1:0)+(e1_c8?1:0)
-e1_put_score  = (e1_p1?1:0)+(e1_p2?1:0)+(e1_p3?1:0)+(e1_p4?1:0)+(e1_p5?1:0)+(e1_p6?1:0)+(e1_p7?1:0)+(e1_p8?1:0)
-
-e1_mandatory_call = e1_c1 and e1_c2 and e1_c3
-e1_mandatory_put  = e1_p1 and e1_p2 and e1_p3
-
-e1_call = e1_mandatory_call and e1_call_score >= min_e1
-e1_put  = e1_mandatory_put  and e1_put_score  >= min_e1
-
-// ══════════════════════════════════════════
-//   ESTRATEGIA 2 — RESUMEN 20 · 9:30 AM
-//   9:30–10:00 AM ET
-//   Take Profit: 30% | Stop Loss: 15%
-// ══════════════════════════════════════════
-
-e2_c1 = w_e1_e2
-e2_c2 = inside_bb
-e2_c3 = bb_expanding
-e2_c4 = above_vwap
-e2_c5 = ema7 > ema26 and ema26 > ema50
-e2_c6 = no_resist_above
-e2_c7 = macd_bull
-e2_c8 = rsi_call
-e2_c9 = bull_candle and strong_candle and vol_high
-
-e2_p1 = w_e1_e2
-e2_p2 = inside_bb
-e2_p3 = bb_expanding
-e2_p4 = below_vwap
-e2_p5 = ema7 < ema26 and ema26 < ema50
-e2_p6 = no_support_below
-e2_p7 = macd_bear
-e2_p8 = rsi_put
-e2_p9 = bear_candle and strong_candle and vol_high
-
-e2_call_score = (e2_c1?1:0)+(e2_c2?1:0)+(e2_c3?1:0)+(e2_c4?1:0)+(e2_c5?1:0)+(e2_c6?1:0)+(e2_c7?1:0)+(e2_c8?1:0)+(e2_c9?1:0)
-e2_put_score  = (e2_p1?1:0)+(e2_p2?1:0)+(e2_p3?1:0)+(e2_p4?1:0)+(e2_p5?1:0)+(e2_p6?1:0)+(e2_p7?1:0)+(e2_p8?1:0)+(e2_p9?1:0)
-
-e2_mandatory_call = e2_c1 and e2_c2 and e2_c3 and e2_c4
-e2_mandatory_put  = e2_p1 and e2_p2 and e2_p3 and e2_p4
-
-e2_call = e2_mandatory_call and e2_call_score >= min_e2
-e2_put  = e2_mandatory_put  and e2_put_score  >= min_e2
-
-// ══════════════════════════════════════════
-//   ESTRATEGIA 3 — RESUMEN 20 · 3:30 PM
-//   3:30–4:00 PM ET (vender antes 3:58)
-//   Take Profit: 20% | Stop Loss: 10%
-// ══════════════════════════════════════════
-
-e3_c1 = w_e3_safe
-e3_c2 = day_bull
-e3_c3 = above_vwap
-e3_c4 = inside_bb
-e3_c5 = bb_expanding
-e3_c6 = ema7 > ema26
-e3_c7 = macd_bull
-e3_c8 = rsi_call
-e3_c9 = bull_candle and vol_high
-
-e3_p1 = w_e3_safe
-e3_p2 = day_bear
-e3_p3 = below_vwap
-e3_p4 = inside_bb
-e3_p5 = bb_expanding
-e3_p6 = ema7 < ema26
-e3_p7 = macd_bear
-e3_p8 = rsi_put
-e3_p9 = bear_candle and vol_high
-
-e3_call_score = (e3_c1?1:0)+(e3_c2?1:0)+(e3_c3?1:0)+(e3_c4?1:0)+(e3_c5?1:0)+(e3_c6?1:0)+(e3_c7?1:0)+(e3_c8?1:0)+(e3_c9?1:0)
-e3_put_score  = (e3_p1?1:0)+(e3_p2?1:0)+(e3_p3?1:0)+(e3_p4?1:0)+(e3_p5?1:0)+(e3_p6?1:0)+(e3_p7?1:0)+(e3_p8?1:0)+(e3_p9?1:0)
-
-e3_mandatory_call = e3_c1 and e3_c2 and e3_c3
-e3_mandatory_put  = e3_p1 and e3_p2 and e3_p3
-
-e3_call = e3_mandatory_call and e3_call_score >= min_e3
-e3_put  = e3_mandatory_put  and e3_put_score  >= min_e3
-
-// ══════════════════════════════════════════
-//   ESTRATEGIA 4 — RESUMEN 20 · 10:00 AM
-//   10:00–11:00 AM ET
-//   Take Profit: 25% | Stop Loss: 15%
-// ══════════════════════════════════════════
-
-e4_c1 = w_e4
-e4_c2 = above_vwap
-e4_c3 = inside_bb
-e4_c4 = bb_expanding
-e4_c5 = ema7 > ema26 and ema26 > ema50
-e4_c6 = macd_bull
-e4_c7 = rsi_call
-e4_c8 = adx_ok_e4
-e4_c9 = bull_candle and strong_candle and vol_high and momentum_up
-
-e4_p1 = w_e4
-e4_p2 = below_vwap
-e4_p3 = inside_bb
-e4_p4 = bb_expanding
-e4_p5 = ema7 < ema26 and ema26 < ema50
-e4_p6 = macd_bear
-e4_p7 = rsi_put
-e4_p8 = adx_ok_e4
-e4_p9 = bear_candle and strong_candle and vol_high and momentum_down
-
-e4_call_score = (e4_c1?1:0)+(e4_c2?1:0)+(e4_c3?1:0)+(e4_c4?1:0)+(e4_c5?1:0)+(e4_c6?1:0)+(e4_c7?1:0)+(e4_c8?1:0)+(e4_c9?1:0)
-e4_put_score  = (e4_p1?1:0)+(e4_p2?1:0)+(e4_p3?1:0)+(e4_p4?1:0)+(e4_p5?1:0)+(e4_p6?1:0)+(e4_p7?1:0)+(e4_p8?1:0)+(e4_p9?1:0)
-
-e4_mandatory_call = e4_c1 and e4_c2 and e4_c3 and e4_c4
-e4_mandatory_put  = e4_p1 and e4_p2 and e4_p3 and e4_p4
-
-e4_call = e4_mandatory_call and e4_call_score >= min_e4
-e4_put  = e4_mandatory_put  and e4_put_score  >= min_e4
-
-
-// ══════════════════════════════════════════
-//   ESTRATEGIA 5 — SEMANAL SPY/QQQ
-//   Entrada Lunes/Martes 9:30–11:00 AM ET
-//   Expiración: Viernes misma semana
-//   Take Profit: 50% | Stop Loss: 25%
-//   Variables nuevas: StochRSI + Regla pérdida semanal
-// ══════════════════════════════════════════
-
-// Día de la semana
-ny_dow   = dayofweek(time, "America/New_York")
-is_mon   = ny_dow == 2
-is_tue   = ny_dow == 3
-is_wed   = ny_dow == 4
-is_thu   = ny_dow == 5
-
-// Ventana E5: Lunes o Martes 9:30–11:00 AM
-w_e5 = (is_mon or is_tue) and ny_total >= (9*60+30) and ny_total < (11*60)
-
-// Tendencia semanal — EMA 20 diaria
-ema20_daily      = request.security(syminfo.tickerid, "D", ta.ema(close, 20))
-ema20_daily_prev = request.security(syminfo.tickerid, "D", ta.ema(close, 20)[1])
-weekly_bull      = ema20_daily > ema20_daily_prev
-weekly_bear      = ema20_daily < ema20_daily_prev
-
-// Stochastic RSI (nuevo)
-stoch_k_len  = input.int(14, "StochRSI K", group="Stoch RSI")
-stoch_d_len  = input.int(3,  "StochRSI D", group="Stoch RSI")
-stoch_smooth = input.int(3,  "StochRSI Smooth", group="Stoch RSI")
-rsi_stoch    = ta.rsi(close, stoch_k_len)
-stoch_raw    = ta.stoch(rsi_stoch, rsi_stoch, rsi_stoch, stoch_k_len)
-stoch_k      = ta.sma(stoch_raw, stoch_smooth)
-stoch_d      = ta.sma(stoch_k, stoch_d_len)
-stochrsi_bull = stoch_k > stoch_d and stoch_k < 80 and stoch_k > stoch_k[1]
-stochrsi_bear = stoch_k < stoch_d and stoch_k > 20 and stoch_k < stoch_k[1]
-
-// Alerta jueves
-thu_warning = is_thu and ny_total >= (9*60+30) and ny_total < (16*60)
-
-// Condiciones E5 CALL — 11 condiciones
-e5_c1  = w_e5
-e5_c2  = weekly_bull
-e5_c3  = above_vwap
-e5_c4  = inside_bb
-e5_c5  = bb_expanding
-e5_c6  = ema7 > ema26 and ema26 > ema50
-e5_c7  = macd_bull
-e5_c8  = rsi_call
-e5_c9  = stochrsi_bull
-e5_c10 = adx_ok_e2
-e5_c11 = bull_candle and strong_candle and vol_high
-
-// Condiciones E5 PUT — 11 condiciones
-e5_p1  = w_e5
-e5_p2  = weekly_bear
-e5_p3  = below_vwap
-e5_p4  = inside_bb
-e5_p5  = bb_expanding
-e5_p6  = ema7 < ema26 and ema26 < ema50
-e5_p7  = macd_bear
-e5_p8  = rsi_put
-e5_p9  = stochrsi_bear
-e5_p10 = adx_ok_e2
-e5_p11 = bear_candle and strong_candle and vol_high
-
-e5_call_score = (e5_c1?1:0)+(e5_c2?1:0)+(e5_c3?1:0)+(e5_c4?1:0)+(e5_c5?1:0)+(e5_c6?1:0)+(e5_c7?1:0)+(e5_c8?1:0)+(e5_c9?1:0)+(e5_c10?1:0)+(e5_c11?1:0)
-e5_put_score  = (e5_p1?1:0)+(e5_p2?1:0)+(e5_p3?1:0)+(e5_p4?1:0)+(e5_p5?1:0)+(e5_p6?1:0)+(e5_p7?1:0)+(e5_p8?1:0)+(e5_p9?1:0)+(e5_p10?1:0)+(e5_p11?1:0)
-
-e5_mandatory_call = e5_c1 and e5_c2 and e5_c3
-e5_mandatory_put  = e5_p1 and e5_p2 and e5_p3
-
-e5_call = e5_mandatory_call and e5_call_score >= 9
-e5_put  = e5_mandatory_put  and e5_put_score  >= 9
-
-
-// ══════════════════════════════════════════
-//   SEÑALES COMBINADAS
-// ══════════════════════════════════════════
-
-any_call = e1_call or e2_call or e3_call or e4_call or e5_call
-any_put  = e1_put  or e2_put  or e3_put  or e4_put  or e5_put
-
-// ══════════════════════════════════════════
-//   VISUALIZACIÓN
-// ══════════════════════════════════════════
-
-// Fondos de ventanas horarias
-bgcolor(w_e1_e2  ? color.new(color.green,  92) : na, title="Ventana E1/E2")
-bgcolor(w_e5     ? color.new(color.yellow, 92) : na, title="Ventana E5 Semanal")
-bgcolor(w_e4     ? color.new(color.blue,   92) : na, title="Ventana E4")
-bgcolor(w_e3_safe? color.new(color.orange, 92) : na, title="Ventana E3")
-
-// EMAs
-plot(ema7,  "EMA 7",  color=color.new(color.green,  0), linewidth=1)
-plot(ema26, "EMA 26", color=color.new(color.orange, 0), linewidth=1)
-plot(ema50, "EMA 50", color=color.new(color.red,    0), linewidth=2)
-
-// VWAP
-plot(vwap_val, "VWAP", color=color.new(color.purple, 0), linewidth=2)
-
-// Señales E1
-plotshape(show_signals and e1_call, "E1 CALL", location.belowbar, style=shape.triangleup,   color=color.new(color.green, 0), textcolor=color.white, text="E1\\nCALL", size=size.small)
-plotshape(show_signals and e1_put,  "E1 PUT",  location.abovebar, style=shape.triangledown, color=color.new(color.red,   0), textcolor=color.white, text="E1\\nPUT",  size=size.small)
-
-// Señales E2
-plotshape(show_signals and e2_call, "E2 CALL", location.belowbar, style=shape.labelup,   color=color.new(color.lime,   0), textcolor=color.white, text="E2 CALL\\n"+str.tostring(e2_call_score)+"/9", size=size.normal)
-plotshape(show_signals and e2_put,  "E2 PUT",  location.abovebar, style=shape.labeldown, color=color.new(color.maroon, 0), textcolor=color.white, text="E2 PUT\\n"+str.tostring(e2_put_score)+"/9",  size=size.normal)
-
-// Señales E3
-plotshape(show_signals and e3_call, "E3 CALL", location.belowbar, style=shape.labelup,   color=color.new(color.teal,   0), textcolor=color.white, text="E3 CALL\\n"+str.tostring(e3_call_score)+"/9", size=size.normal)
-plotshape(show_signals and e3_put,  "E3 PUT",  location.abovebar, style=shape.labeldown, color=color.new(color.purple, 0), textcolor=color.white, text="E3 PUT\\n"+str.tostring(e3_put_score)+"/9",  size=size.normal)
-
-// Señales E4
-plotshape(show_signals and e4_call, "E4 CALL", location.belowbar, style=shape.labelup,   color=color.new(color.aqua,   0), textcolor=color.white, text="E4 CALL\\n"+str.tostring(e4_call_score)+"/9", size=size.normal)
-plotshape(show_signals and e4_put,  "E4 PUT",  location.abovebar, style=shape.labeldown, color=color.new(color.fuchsia,0), textcolor=color.white, text="E4 PUT\\n"+str.tostring(e4_put_score)+"/9",  size=size.normal)
-
-// ══════════════════════════════════════════
-//   TABLA EN TIEMPO REAL
-// ══════════════════════════════════════════
-
-if show_table and barstate.islast
-    var table t = table.new(position.top_right, 5, 12,
-                            bgcolor=color.new(color.black, 15),
-                            border_color=color.gray, border_width=1,
-                            frame_color=color.gray, frame_width=1)
-
-    // Headers
-    table.cell(t, 0, 0, "CONDICIÓN",    text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
-    table.cell(t, 1, 0, "E1",           text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
-    table.cell(t, 2, 0, "E2",           text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
-    table.cell(t, 3, 0, "E3",           text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
-    table.cell(t, 4, 0, "E4",           text_color=color.white, bgcolor=color.new(color.navy,10), text_size=size.tiny)
-
-    // Condiciones comunes
-    conds = array.from("① Ventana horaria","② Dentro BB","③ BB expandiéndose","④ VWAP a favor","⑤ EMAs alineadas","⑥ Sin S/R encima","⑦ MACD a favor","⑧ RSI en rango","⑨ Vela+Volumen","⑩ ADX/Momentum")
-
-    // CALL scores por estrategia
-    e1_arr = array.from(e1_c1,e1_c2,e1_c3,e1_c4,e1_c5,false,e1_c6,e1_c7,e1_c8,false)
-    e2_arr = array.from(e2_c1,e2_c2,e2_c3,e2_c4,e2_c5,e2_c6,e2_c7,e2_c8,e2_c9,false)
-    e3_arr = array.from(e3_c1,e3_c2,e3_c3,e3_c4,false,false,e3_c7,e3_c8,e3_c9,false)
-    e4_arr = array.from(e4_c1,e4_c3,e4_c4,e4_c2,e4_c5,false,e4_c6,e4_c7,e4_c9,e4_c8)
-
-    for i = 0 to 9
-        table.cell(t, 0, i+1, array.get(conds, i), text_color=color.white, text_size=size.tiny, bgcolor=color.new(color.gray,60))
-
-        v1 = array.get(e1_arr, i)
-        v2 = array.get(e2_arr, i)
-        v3 = array.get(e3_arr, i)
-        v4 = array.get(e4_arr, i)
-
-        table.cell(t,1,i+1,v1?"✅":"❌",text_color=v1?color.green:color.red,bgcolor=v1?color.new(color.green,80):color.new(color.red,80),text_size=size.tiny)
-        table.cell(t,2,i+1,v2?"✅":"❌",text_color=v2?color.green:color.red,bgcolor=v2?color.new(color.green,80):color.new(color.red,80),text_size=size.tiny)
-        table.cell(t,3,i+1,v3?"✅":"❌",text_color=v3?color.green:color.red,bgcolor=v3?color.new(color.green,80):color.new(color.red,80),text_size=size.tiny)
-        table.cell(t,4,i+1,v4?"✅":"❌",text_color=v4?color.green:color.red,bgcolor=v4?color.new(color.green,80):color.new(color.red,80),text_size=size.tiny)
-
-    // Scores finales
-    e1c_txt = e1_call ? "✅CALL "+str.tostring(e1_call_score)+"/8" : e1_put ? "✅PUT "+str.tostring(e1_put_score)+"/8" : str.tostring(math.max(e1_call_score,e1_put_score))+"/8"
-    e2c_txt = e2_call ? "✅CALL "+str.tostring(e2_call_score)+"/9" : e2_put ? "✅PUT "+str.tostring(e2_put_score)+"/9" : str.tostring(math.max(e2_call_score,e2_put_score))+"/9"
-    e3c_txt = e3_call ? "✅CALL "+str.tostring(e3_call_score)+"/9" : e3_put ? "✅PUT "+str.tostring(e3_put_score)+"/9" : str.tostring(math.max(e3_call_score,e3_put_score))+"/9"
-    e4c_txt = e4_call ? "✅CALL "+str.tostring(e4_call_score)+"/9" : e4_put ? "✅PUT "+str.tostring(e4_put_score)+"/9" : str.tostring(math.max(e4_call_score,e4_put_score))+"/9"
-
-    table.cell(t,0,11,"SEÑAL",     text_color=color.white,bgcolor=color.new(color.navy,10),text_size=size.tiny)
-    table.cell(t,1,11,e1c_txt,     text_color=color.white,bgcolor=(e1_call or e1_put)?color.new(color.green,20):color.new(color.gray,60),text_size=size.tiny)
-    table.cell(t,2,11,e2c_txt,     text_color=color.white,bgcolor=(e2_call or e2_put)?color.new(color.green,20):color.new(color.gray,60),text_size=size.tiny)
-    table.cell(t,3,11,e3c_txt,     text_color=color.white,bgcolor=(e3_call or e3_put)?color.new(color.green,20):color.new(color.gray,60),text_size=size.tiny)
-    table.cell(t,4,11,e4c_txt,     text_color=color.white,bgcolor=(e4_call or e4_put)?color.new(color.green,20):color.new(color.gray,60),text_size=size.tiny)
-
-
-// E5 Señales
-plotshape(show_signals and e5_call, "E5 CALL", location.belowbar, style=shape.labelup,   color=color.new(color.yellow, 0), textcolor=color.black, text="E5 CALL\\n"+str.tostring(e5_call_score)+"/11", size=size.large)
-plotshape(show_signals and e5_put,  "E5 PUT",  location.abovebar, style=shape.labeldown, color=color.new(color.orange, 0), textcolor=color.black, text="E5 PUT\\n"+str.tostring(e5_put_score)+"/11",  size=size.large)
-
-// Alerta jueves
-bgcolor(thu_warning ? color.new(color.orange, 85) : na, title="Jueves — revisar semanal")
-
-
-// ══════════════════════════════════════════
-//   ALERTAS
-// ══════════════════════════════════════════
-
-// E1 Alertas
-alertcondition(e1_call, "🟢 E1 CALL — Bollinger 0DTE",
-    "✅ E1 CALL — {{ticker}} M15\\nScore: {{plot_0}}/8\\nPrecio: {{close}}\\nTP: 50% | SL: 25%\\n9:30–10:00 ET")
-alertcondition(e1_put, "🔴 E1 PUT — Bollinger 0DTE",
-    "✅ E1 PUT — {{ticker}} M15\\nScore: {{plot_0}}/8\\nPrecio: {{close}}\\nTP: 50% | SL: 25%\\n9:30–10:00 ET")
-
-// E2 Alertas
-alertcondition(e2_call, "🟢 E2 CALL — Resumen 20 · 9:30 AM",
-    "✅ E2 CALL — {{ticker}} M15\\nScore: {{plot_0}}/9\\nPrecio: {{close}}\\nTP: 30% | SL: 15%\\n9:30–10:00 ET")
-alertcondition(e2_put, "🔴 E2 PUT — Resumen 20 · 9:30 AM",
-    "✅ E2 PUT — {{ticker}} M15\\nScore: {{plot_0}}/9\\nPrecio: {{close}}\\nTP: 30% | SL: 15%\\n9:30–10:00 ET")
-
-// E3 Alertas
-alertcondition(e3_call, "🟢 E3 CALL — Resumen 20 · 3:30 PM",
-    "✅ E3 CALL — {{ticker}} M15\\nScore: {{plot_0}}/9\\nPrecio: {{close}}\\nTP: 20% | SL: 10%\\n⚠️ VENDER ANTES 3:58 PM")
-alertcondition(e3_put, "🔴 E3 PUT — Resumen 20 · 3:30 PM",
-    "✅ E3 PUT — {{ticker}} M15\\nScore: {{plot_0}}/9\\nPrecio: {{close}}\\nTP: 20% | SL: 10%\\n⚠️ VENDER ANTES 3:58 PM")
-
-// E4 Alertas
-alertcondition(e4_call, "🟢 E4 CALL — Resumen 20 · 10:00 AM",
-    "✅ E4 CALL — {{ticker}} M15\\nScore: {{plot_0}}/9\\nPrecio: {{close}}\\nTP: 25% | SL: 15%\\n10:00–11:00 ET")
-alertcondition(e4_put, "🔴 E4 PUT — Resumen 20 · 10:00 AM",
-    "✅ E4 PUT — {{ticker}} M15\\nScore: {{plot_0}}/9\\nPrecio: {{close}}\\nTP: 25% | SL: 15%\\n10:00–11:00 ET")
-
-// Alerta general
-alertcondition(any_call or any_put, "⚡ SEÑAL — Ultimate Entry M15",
-    "⚡ SEÑAL DETECTADA — {{ticker}} M15\\nPrecio: {{close}}\\nRevisa el gráfico y ejecuta en IB")
-
-
-// E5 Alertas
-alertcondition(e5_call, "🟢 E5 CALL — Semanal SPY/QQQ",
-    "✅ E5 CALL SEMANAL — {{ticker}}\\nScore: {{plot_0}}/10\\nPrecio: {{close}}\\nTP: 50% | SL: 25%\\nExpiración: Viernes\\nEntrada: Lunes/Martes 9:30–11:00 ET")
-alertcondition(e5_put, "🔴 E5 PUT — Semanal SPY/QQQ",
-    "✅ E5 PUT SEMANAL — {{ticker}}\\nScore: {{plot_0}}/10\\nPrecio: {{close}}\\nTP: 50% | SL: 25%\\nExpiración: Viernes\\nEntrada: Lunes/Martes 9:30–11:00 ET")
-alertcondition(thu_warning and (e5_call[1] or e5_put[1]), "⚠️ E5 JUEVES — Revisar contrato semanal",
-    "⚠️ HOY ES JUEVES — Revisa tu contrato semanal\\nSi tienes +35% de ganancia VENDE HOY\\nNo esperes al viernes")
-
-
-// Plot oculto para score
-plot(math.max(e1_call_score, e2_call_score, e3_call_score, e4_call_score, e5_call_score), display=display.none, title="Score")
-`;
-function copyScript() {
-  navigator.clipboard.writeText(script).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = '✅ COPIADO — PEGA EN PINE EDITOR DE TRADINGVIEW';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = '📋 COPIAR PINE SCRIPT COMPLETO';
-      btn.classList.remove('copied');
-    }, 4000);
+function copiar(){
+  const code = document.getElementById('code').textContent;
+  navigator.clipboard.writeText(code).then(()=>{
+    const b=document.getElementById('btn');
+    b.textContent='✅ COPIADO — pégalo en TradingView';
+    b.classList.add('copied');
+    setTimeout(()=>{b.textContent='📋 COPIAR PINE SCRIPT COMPLETO';b.classList.remove('copied');},3000);
+  }).catch(()=>{
+    // Fallback
+    const r=document.createRange();
+    r.selectNode(document.getElementById('code'));
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(r);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    const b=document.getElementById('btn');
+    b.textContent='✅ COPIADO';
+    setTimeout(()=>{b.textContent='📋 COPIAR PINE SCRIPT COMPLETO';},3000);
   });
 }
 </script>
