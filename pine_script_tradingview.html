@@ -238,16 +238,16 @@ plot(ema7,  "EMA7",  color=color.new(color.green,0))
 plot(ema26, "EMA26", color=color.new(color.orange,0))
 plot(vwap_v,"VWAP",  color=color.new(color.purple,0), linewidth=2)
 
-plotshape(show_sig and e1_call, "E1 CALL", location.belowbar, shape.triangleup,   color=color.new(color.green,0),  text="E1", textcolor=color.white, size=size.small)
-plotshape(show_sig and e1_put,  "E1 PUT",  location.abovebar, shape.triangledown, color=color.new(color.red,0),    text="E1", textcolor=color.white, size=size.small)
-plotshape(show_sig and e2_call, "E2 CALL", location.belowbar, shape.labelup,   color=color.new(color.lime,0),    text="E2 CALL", textcolor=color.white, size=size.normal)
-plotshape(show_sig and e2_put,  "E2 PUT",  location.abovebar, shape.labeldown, color=color.new(color.maroon,0),  text="E2 PUT",  textcolor=color.white, size=size.normal)
-plotshape(show_sig and e3_call, "E3 CALL", location.belowbar, shape.labelup,   color=color.new(color.teal,0),    text="E3 CALL", textcolor=color.white, size=size.normal)
-plotshape(show_sig and e3_put,  "E3 PUT",  location.abovebar, shape.labeldown, color=color.new(color.purple,0),  text="E3 PUT",  textcolor=color.white, size=size.normal)
-plotshape(show_sig and e4_call, "E4 CALL", location.belowbar, shape.labelup,   color=color.new(color.aqua,0),    text="E4 CALL", textcolor=color.white, size=size.normal)
-plotshape(show_sig and e4_put,  "E4 PUT",  location.abovebar, shape.labeldown, color=color.new(color.fuchsia,0), text="E4 PUT",  textcolor=color.white, size=size.normal)
-plotshape(show_sig and e5_call, "E5 CALL", location.belowbar, shape.labelup,   color=color.new(color.yellow,0),  text="E5 CALL", textcolor=color.black, size=size.large)
-plotshape(show_sig and e5_put,  "E5 PUT",  location.abovebar, shape.labeldown, color=color.new(color.orange,0),  text="E5 PUT",  textcolor=color.black, size=size.large)
+plotshape(show_sig and e1_call, title="E1 CALL", style=shape.triangleup, location=location.belowbar,   color=color.new(color.green,0),  text="E1", textcolor=color.white, size=size.small)
+plotshape(show_sig and e1_put,  title="E1 PUT",  style=shape.triangledown, location=location.abovebar, color=color.new(color.red,0),    text="E1", textcolor=color.white, size=size.small)
+plotshape(show_sig and e2_call, title="E2 CALL", style=shape.labelup, location=location.belowbar,   color=color.new(color.lime,0),    text="E2 CALL", textcolor=color.white, size=size.normal)
+plotshape(show_sig and e2_put,  title="E2 PUT",  style=shape.labeldown, location=location.abovebar, color=color.new(color.maroon,0),  text="E2 PUT",  textcolor=color.white, size=size.normal)
+plotshape(show_sig and e3_call, title="E3 CALL", style=shape.labelup, location=location.belowbar,   color=color.new(color.teal,0),    text="E3 CALL", textcolor=color.white, size=size.normal)
+plotshape(show_sig and e3_put,  title="E3 PUT",  style=shape.labeldown, location=location.abovebar, color=color.new(color.purple,0),  text="E3 PUT",  textcolor=color.white, size=size.normal)
+plotshape(show_sig and e4_call, title="E4 CALL", style=shape.labelup, location=location.belowbar,   color=color.new(color.aqua,0),    text="E4 CALL", textcolor=color.white, size=size.normal)
+plotshape(show_sig and e4_put,  title="E4 PUT",  style=shape.labeldown, location=location.abovebar, color=color.new(color.fuchsia,0), text="E4 PUT",  textcolor=color.white, size=size.normal)
+plotshape(show_sig and e5_call, title="E5 CALL", style=shape.labelup, location=location.belowbar,   color=color.new(color.yellow,0),  text="E5 CALL", textcolor=color.black, size=size.large)
+plotshape(show_sig and e5_put,  title="E5 PUT",  style=shape.labeldown, location=location.abovebar, color=color.new(color.orange,0),  text="E5 PUT",  textcolor=color.black, size=size.large)
 
 bgcolor(is_thu and (e5_call[1] or e5_put[1]) ? color.new(color.orange,80) : na, title="Jueves E5")
 
@@ -272,16 +272,46 @@ if show_table and barstate.islast
         table.cell(t,2,i+1,sig,text_color=color.white,bgcolor=sigcol,text_size=size.tiny)
 
 // ── ALERTAS ──
-alertcondition(e1_call, "E1 CALL", "✅ E1 CALL {{ticker}} ATM\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E1&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
-alertcondition(e1_put,  "E1 PUT",  "✅ E1 PUT {{ticker}} ATM\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E1&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
-alertcondition(e2_call, "E2 CALL", "✅ E2 CALL {{ticker}} ATM (H1 alcista)\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E2&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
-alertcondition(e2_put,  "E2 PUT",  "✅ E2 PUT {{ticker}} ATM (H1 bajista)\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E2&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
-alertcondition(e3_call, "E3 CALL", "✅ E3 CALL {{ticker}} ATM\nPrecio: {{close}}\nSL10 · ⚠️VENDER 3:55 PM SIN EXCEPCIÓN\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E3&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
-alertcondition(e3_put,  "E3 PUT",  "✅ E3 PUT {{ticker}} ATM\nPrecio: {{close}}\nSL10 · ⚠️VENDER 3:55 PM SIN EXCEPCIÓN\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E3&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
-alertcondition(e4_call, "E4 CALL", "✅ E4 CALL {{ticker}} ATM\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E4&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
-alertcondition(e4_put,  "E4 PUT",  "✅ E4 PUT {{ticker}} ATM\nPrecio: {{close}}\nTP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E4&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
-alertcondition(e5_call, "E5 CALL", "✅ E5 CALL SEMANAL {{ticker}} ATM exp. viernes\nPrecio: {{close}}\nTP50 SL25 · Verificar: sin Fed/CPI esta semana\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E5&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
-alertcondition(e5_put,  "E5 PUT",  "✅ E5 PUT SEMANAL {{ticker}} ATM exp. viernes\nPrecio: {{close}}\nTP50 SL25 · Verificar: sin Fed/CPI esta semana\n🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E5&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e1_call, "E1 CALL", "✅ E1 CALL {{ticker}} ATM
+Precio: {{close}}
+TP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E1&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e1_put,  "E1 PUT",  "✅ E1 PUT {{ticker}} ATM
+Precio: {{close}}
+TP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E1&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e2_call, "E2 CALL", "✅ E2 CALL {{ticker}} ATM (H1 alcista)
+Precio: {{close}}
+TP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E2&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e2_put,  "E2 PUT",  "✅ E2 PUT {{ticker}} ATM (H1 bajista)
+Precio: {{close}}
+TP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E2&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e3_call, "E3 CALL", "✅ E3 CALL {{ticker}} ATM
+Precio: {{close}}
+SL10 · ⚠️VENDER 3:55 PM SIN EXCEPCIÓN
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E3&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e3_put,  "E3 PUT",  "✅ E3 PUT {{ticker}} ATM
+Precio: {{close}}
+SL10 · ⚠️VENDER 3:55 PM SIN EXCEPCIÓN
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E3&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e4_call, "E4 CALL", "✅ E4 CALL {{ticker}} ATM
+Precio: {{close}}
+TP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E4&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e4_put,  "E4 PUT",  "✅ E4 PUT {{ticker}} ATM
+Precio: {{close}}
+TP20 SL15 · Verificar VIX&lt;25 y spread&lt;5%
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E4&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e5_call, "E5 CALL", "✅ E5 CALL SEMANAL {{ticker}} ATM exp. viernes
+Precio: {{close}}
+TP50 SL25 · Verificar: sin Fed/CPI esta semana
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E5&amp;activo={{ticker}}&amp;signal=CALL&amp;entrada={{close}}&amp;inversion=2000")
+alertcondition(e5_put,  "E5 PUT",  "✅ E5 PUT SEMANAL {{ticker}} ATM exp. viernes
+Precio: {{close}}
+TP50 SL25 · Verificar: sin Fed/CPI esta semana
+🔗 guidopascual.github.io/multiserviciosguido/registro_operaciones.html?estrategia=E5&amp;activo={{ticker}}&amp;signal=PUT&amp;entrada={{close}}&amp;inversion=2000")
 alertcondition(is_thu and (e5_call[1] or e5_put[1]), "E5 Jueves", "⚠️ JUEVES — Revisa tu contrato semanal E5. Si tienes +35% VENDE HOY.")
 
 any_sig = e1_call or e1_put or e2_call or e2_put or e3_call or e3_put or e4_call or e4_put or e5_call or e5_put
