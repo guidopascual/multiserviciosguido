@@ -148,8 +148,10 @@ no_res = pd_high &gt; close * (1 + res_pct)   // máx día anterior a más de 0.
 no_sup = pd_low  &lt; close * (1 - res_pct)   // mín día anterior a más de 0.3% abajo
 
 // ── DIRECCIÓN DEL DÍA (para E3) ──
-day_open = request.security(syminfo.tickerid, "D", open)
-day_chg = (close - day_open) / day_open
+var float day_open = na
+if ny_h == 9 and ny_m == 30
+    day_open := open
+day_chg = na(day_open) ? 0.0 : (close - day_open) / day_open
 day_up = day_chg &gt; 0.01
 day_down = day_chg &lt; -0.01
 
